@@ -27,7 +27,7 @@ const TabsLayout = () => {
     <>
       <Stack>
         <Stack.Screen
-          name="home"
+          name="camera"
           options={{
             headerShown: false,
           }}
