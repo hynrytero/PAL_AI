@@ -1,5 +1,6 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState, useRef, useEffect } from "react";
+import * as FileSystem from 'expo-file-system';
+import axios from 'axios';
 import {
   StyleSheet,
   Text,
@@ -68,6 +69,46 @@ export default function App() {
     );
   }
 
+// Helper function to convert image URI to base64
+const getBase64 = async (uri) => {
+  try {
+    const response = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return response;
+  } catch (error) {
+    console.error("Error reading file:", error);
+    throw error; 
+  }
+};
+
+  //function to take a picture and show it without saving it
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      try {
+        const picture = await cameraRef.current.takePictureAsync();
+  
+        // Set the resized image URI
+        setImage(picture.uri);
+  
+        // Convert the resized image URI to base64
+        const base64Image = await getBase64(picture.uri);
+  
+        // Send the base64 image to the Flask API
+        const response = await axios.post('http://192.168.1.9:5000/predict', {
+          image: base64Image,
+          }, {
+              timeout: 10000 
+          });
+  
+        console.log("API Response: ", response.data);
+
+      } catch (err) {
+        console.log("Error while taking the picture: ", err.message || err);
+      }
+    }
+  };
+  
   //function to toggle camera properties
   const toggleProperty = (prop, option1, option2) => {
     setCameraProps((current) => ({
@@ -90,18 +131,6 @@ export default function App() {
       ...current,
       zoom: Math.max(current.zoom - 0.1, 0),
     }));
-  };
-
-  //function to take a picture and show it without saving it
-  const takePicture = async () => {
-    if (cameraRef.current) {
-      try {
-        const picture = await cameraRef.current.takePictureAsync();
-        setImage(picture.uri);
-      } catch (err) {
-        console.log("Error while taking the picture : ", err);
-      }
-    }
   };
 
   //function to save the picture using MediaLibrary
