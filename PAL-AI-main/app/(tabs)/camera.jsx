@@ -54,16 +54,18 @@ export default function App() {
     // Permissions are not granted yet.
     return (
       <View style={styles.container}>
-        <Text>We need camera and gallery permissions to continue.</Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            requestCameraPermission();
-            requestMediaLibraryPermission();
-          }}
-        >
-          <Text style={styles.buttonText}>Grant Permissions</Text>
-        </TouchableOpacity>
+        <View style={styles.grantContainer}>
+          <Text>We need camera and gallery permissions to continue.</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              requestCameraPermission();
+              requestMediaLibraryPermission();
+            }}
+          >
+            <Text style={styles.buttonText}>Grant Permissions</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -236,6 +238,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     marginTop: 30,
+  },
+  grantContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   topControlsContainer: {
     height: 100,
