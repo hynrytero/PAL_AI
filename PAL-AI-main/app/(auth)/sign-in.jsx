@@ -101,6 +101,7 @@ const SignIn = () => {
        </ImageBackground>
      </SafeAreaView>
    );
+
 };
 
 export default SignIn;

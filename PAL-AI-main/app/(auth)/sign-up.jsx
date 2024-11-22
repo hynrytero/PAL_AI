@@ -6,6 +6,7 @@ import { Link, Redirect, router, Router } from "expo-router";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
+import CustomDropdown from "../../components/CustomDropDown";
 
 const SignUp = () => {
   const [form, setForm] = useState({
@@ -18,6 +19,9 @@ const SignUp = () => {
     confirmpassword: "",
   });
   const [isSubmitting, setisSubmitting] = useState(false);
+
+  const [selectedGender, setSelectedGender] = useState(null);
+
   return (
     <SafeAreaView className="h-full">
       <ImageBackground
@@ -52,6 +56,27 @@ const SignUp = () => {
                 handleChangeText={(e) => setForm({ ...form, lastname: e })}
                 otherStyles="mt-7 w-[48%]"
                 keyboardType="default"
+              />
+            </View>
+            <View className="flex-row w-full justify-between">
+              <FormField
+                title="Age"
+                value={form.firstname}
+                handleChangeText={(e) => setForm({ ...form, firstname: e })}
+                otherStyles="mt-7 w-[48%]"
+                keyboardType="default"
+              />
+              <CustomDropdown
+                title="Select Gender"
+                value={selectedGender}
+                placeholder="Select Gender"
+                data={[
+                  { label: "Male", value: "Male" },
+                  { label: "Female", value: "Female" },
+                  { label: "Prefer not to say", value: "Prefer not to say" },
+                ]}
+                handleChange={(value) => setSelectedGender(value)}
+                otherStyles="mt-6 w-[48%]"
               />
             </View>
             <FormField
@@ -91,7 +116,7 @@ const SignUp = () => {
             />
             <CustomButton
               title="Sign in"
-              handlePress={() => router.push("/sign-up")}
+              handlePress={() => router.push("/sign-in")}
               containerStyles="w-full mt-7"
               isLoading={isSubmitting}
             />
