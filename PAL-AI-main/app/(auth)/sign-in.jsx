@@ -51,7 +51,7 @@ const SignIn = () => {
             />
             <CustomButton
               title="Log in"
-              handlePress={() => router.push("test")}
+              handlePress={() => router.push("home")}
               containerStyles="w-full mt-5"
               isLoading={isSubmitting}
             />
