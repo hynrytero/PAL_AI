@@ -30,11 +30,11 @@ const SignIn = () => {
          password: form.password
        });
 
-       // Handle successful login
+       // Handle successful login ari dapita
        if (response.data.user) {
          Alert.alert("Success", "Login Successful");
          // Navigate to camera or home screen
-         router.push("camera");
+         router.push("result");
        }
      } catch (error) {
        // Handle login errors

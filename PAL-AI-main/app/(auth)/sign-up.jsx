@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, Image, ImageBackground } from "react-native";
+import { View, Text, ScrollView, Image, ImageBackground, Alert } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, Redirect, router, Router } from "expo-router";
+import { Link, router } from "expo-router";
+import axios from 'axios';
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -12,15 +13,49 @@ const SignUp = () => {
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",
+    age: "",
     email: "",
     mobilenumber: "",
     username: "",
     password: "",
     confirmpassword: "",
   });
-  const [isSubmitting, setisSubmitting] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGender, setSelectedGender] = useState(null);
+
+  const handleSignUp = async () => {
+    // Basic validation
+    if (form.password !== form.confirmpassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    if (!form.username || !form.email || !form.password) {
+      Alert.alert("Error", "Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post('http://192.168.1.9:5000/signup', {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+        firstname: form.firstname,
+        lastname: form.lastname,
+        age: form.age,
+        gender: selectedGender,
+        mobilenumber: form.mobilenumber
+      });
+
+      Alert.alert("Success", "Account created successfully");
+      router.push("/sign-in");
+    } catch (error) {
+      Alert.alert("Error", error.response?.data?.message || "Registration failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView className="h-full">
@@ -61,10 +96,10 @@ const SignUp = () => {
             <View className="flex-row w-full justify-between">
               <FormField
                 title="Age"
-                value={form.firstname}
-                handleChangeText={(e) => setForm({ ...form, firstname: e })}
+                value={form.age}
+                handleChangeText={(e) => setForm({ ...form, age: e })}
                 otherStyles="mt-7 w-[48%]"
-                keyboardType="default"
+                keyboardType="numeric"
               />
               <CustomDropdown
                 title="Select Gender"
@@ -106,6 +141,7 @@ const SignUp = () => {
               handleChangeText={(e) => setForm({ ...form, password: e })}
               otherStyles="mt-2"
               keyboardType="password"
+              secureTextEntry
             />
             <FormField
               title="Confirm Password"
@@ -113,10 +149,11 @@ const SignUp = () => {
               handleChangeText={(e) => setForm({ ...form, confirmpassword: e })}
               otherStyles="mt-2"
               keyboardType="password"
+              secureTextEntry
             />
             <CustomButton
-              title="Sign in"
-              handlePress={() => router.push("/sign-in")}
+              title="Sign Up"
+              handlePress={handleSignUp}
               containerStyles="w-full mt-7"
               isLoading={isSubmitting}
             />
