@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
@@ -7,17 +6,27 @@ import {
   Image,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
+import * as ImagePicker from "expo-image-picker"; 
+import * as FileSystem from "expo-file-system";
 import Slider from "@react-native-community/slider";
-import Button from "../../components/CameraButton";
+import Button from "../../components/CameraButton"; 
 import { router } from "expo-router";
 
+const API_URL = "http://192.168.1.7:5000/predict";
+
 export default function App() {
+  // Permissions hooks
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [mediaLibraryPermissionResponse, requestMediaLibraryPermission] =
     MediaLibrary.usePermissions();
+  const [imagePickerPermission, requestImagePickerPermission] = 
+    ImagePicker.useMediaLibraryPermissions();
+
+  // Camera and image state
   const [cameraProps, setCameraProps] = useState({
     zoom: 0,
     facing: "back",
@@ -27,101 +36,133 @@ export default function App() {
   });
   const [image, setImage] = useState(null);
   const [previousImage, setPreviousImage] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [predictions, setPredictions] = useState(null);
 
+  // Camera reference
   const cameraRef = useRef(null);
 
-  //to load the last saved image when permissions change
+  // Check and load last saved image on component mount
   useEffect(() => {
     if (
-      cameraPermission &&
-      cameraPermission.granted &&
-      mediaLibraryPermissionResponse &&
-      mediaLibraryPermissionResponse.status === "granted"
+      cameraPermission?.granted &&
+      mediaLibraryPermissionResponse?.status === "granted"
     ) {
       getLastSavedImage();
     }
   }, [cameraPermission, mediaLibraryPermissionResponse]);
 
-  if (!cameraPermission || !mediaLibraryPermissionResponse) {
-    // Permissions are still loading.
-    return <View />;
-  }
-
-  if (
-    !cameraPermission.granted ||
-    mediaLibraryPermissionResponse.status !== "granted"
-  ) {
-    // Permissions are not granted yet.
-    return (
-      <View style={styles.container}>
-        <View style={styles.grantContainer}>
-          <Text>We need camera and gallery permissions to continue.</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              requestCameraPermission();
-              requestMediaLibraryPermission();
-            }}
-          >
-            <Text style={styles.buttonText}>Grant Permissions</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  //function to toggle camera properties
-  const toggleProperty = (prop, option1, option2) => {
-    setCameraProps((current) => ({
-      ...current,
-      [prop]: current[prop] === option1 ? option2 : option1,
-    }));
+  // Convert image to base64 for API transmission
+  const imageToBase64 = async (uri) => {
+    try {
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+      console.error("Error converting image to base64:", error);
+      throw error;
+    }
   };
 
-  //function to zoom in
-  const zoomIn = () => {
-    setCameraProps((current) => ({
-      ...current,
-      zoom: Math.min(current.zoom + 0.1, 1),
-    }));
+  // Send image to prediction API
+  const sendImageToAPI = async (imageUri) => {
+    try {
+      setIsProcessing(true);
+      const base64Image = await imageToBase64(imageUri);
+      
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: base64Image,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setPredictions(data.predictions);
+      return data.predictions;
+    } catch (error) {
+      console.error("Error sending image to API:", error);
+      Alert.alert("Error", "Failed to process image");
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  //function to zoom out
-  const zoomOut = () => {
-    setCameraProps((current) => ({
-      ...current,
-      zoom: Math.max(current.zoom - 0.1, 0),
-    }));
-  };
-
-  //function to take a picture and show it without saving it
+  // Take picture from camera
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
         const picture = await cameraRef.current.takePictureAsync();
         setImage(picture.uri);
+        // Automatically send to API when picture is taken
+        const predictions = await sendImageToAPI(picture.uri);
+        console.log("Predictions:", predictions);
       } catch (err) {
-        console.log("Error while taking the picture : ", err);
+        console.log("Error while taking/processing the picture:", err);
+        Alert.alert("Error", "Failed to process image");
       }
     }
   };
 
-  //function to save the picture using MediaLibrary
+  // Pick image from gallery
+  const pickImageFromGallery = async () => {
+    try {
+      // Request permission if not already granted
+      if (!imagePickerPermission?.granted) {
+        const permissionResult = await requestImagePickerPermission();
+        if (!permissionResult.granted) {
+          Alert.alert("Permission Required", "Gallery access is needed to select images.");
+          return;
+        }
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedImage = result.assets[0];
+        setImage(selectedImage.uri);
+        
+        // Send selected image to API
+        const predictions = await sendImageToAPI(selectedImage.uri);
+        console.log("Predictions:", predictions);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to select image");
+    }
+  };
+
+  // Save picture to device gallery
   const savePicture = async () => {
     if (image) {
       try {
         const asset = await MediaLibrary.createAssetAsync(image);
-        const assetInfo = await MediaLibrary.getAssetInfoAsync(asset.id);
-        Alert.alert("Photo saved!", image);
+        Alert.alert("Success", "Photo saved!");
         setImage(null);
+        setPredictions(null);
         getLastSavedImage();
       } catch (err) {
-        console.log("Error while saving the picture : ", err);
+        console.log("Error while saving the picture:", err);
+        Alert.alert("Error", "Failed to save picture");
       }
     }
   };
 
-  //function to get the last saved image from the 'DCIM' album created in the gallery by expo
+  // Retrieve last saved image from gallery
   const getLastSavedImage = async () => {
     if (
       mediaLibraryPermissionResponse &&
@@ -149,14 +190,66 @@ export default function App() {
     }
   };
 
+  // Toggle camera properties
+  const toggleProperty = (prop, option1, option2) => {
+    setCameraProps((current) => ({
+      ...current,
+      [prop]: current[prop] === option1 ? option2 : option1,
+    }));
+  };
+
+  // Zoom controls
+  const zoomIn = () => {
+    setCameraProps((current) => ({
+      ...current,
+      zoom: Math.min(current.zoom + 0.1, 1),
+    }));
+  };
+
+  const zoomOut = () => {
+    setCameraProps((current) => ({
+      ...current,
+      zoom: Math.max(current.zoom - 0.1, 0),
+    }));
+  };
+
+  // Permission check
+  if (!cameraPermission || !mediaLibraryPermissionResponse) {
+    return <View />;
+  }
+
+  // Permission request screen
+  if (
+    !cameraPermission.granted ||
+    mediaLibraryPermissionResponse.status !== "granted"
+  ) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.grantContainer}>
+          <Text>We need camera and gallery permissions to continue.</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              requestCameraPermission();
+              requestMediaLibraryPermission();
+            }}
+          >
+            <Text style={styles.buttonText}>Grant Permissions</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {!image ? (
         <>
+          {/* Top Camera Controls */}
           <View style={styles.topControlsContainer}>
             <Button
-              icon={"arrow-back"}
-              onPress={() => router.push("/sign-in")}
+              icon="arrow-back"
+              onPress={() => router.push("/home")}
             />
             <Button
               icon={cameraProps.flash === "on" ? "flash-on" : "flash-off"}
@@ -174,6 +267,8 @@ export default function App() {
               onPress={() => toggleProperty("enableTorch", true, false)}
             />
           </View>
+
+          {/* Camera View */}
           <CameraView
             style={styles.camera}
             zoom={cameraProps.zoom}
@@ -183,6 +278,8 @@ export default function App() {
             enableTorch={cameraProps.enableTorch}
             ref={cameraRef}
           />
+
+          {/* Zoom Slider */}
           <View style={styles.sliderContainer}>
             <Button icon="zoom-out" onPress={zoomOut} />
             <Slider
@@ -197,16 +294,23 @@ export default function App() {
             />
             <Button icon="zoom-in" onPress={zoomIn} />
           </View>
+
+          {/* Bottom Controls */}
           <View style={styles.bottomControlsContainer}>
-            <TouchableOpacity
+            {        
+            /* <TouchableOpacity
               onPress={() => previousImage && setImage(previousImage)}
             >
               <Image
                 source={{ uri: previousImage }}
                 style={styles.previousImage}
               />
-            </TouchableOpacity>
-
+            </TouchableOpacity> */}
+            <Button
+              icon="photo-library"
+              onPress={pickImageFromGallery}
+              size={40}           
+            />
             <Button
               icon="camera"
               size={60}
@@ -222,9 +326,39 @@ export default function App() {
         </>
       ) : (
         <>
+          {/* Image Preview */}
           <Image source={{ uri: image }} style={styles.camera} />
+          
+          {/* Processing Overlay */}
+          {isProcessing && (
+            <View style={styles.processingOverlay}>
+              <ActivityIndicator size="large" color="#ffffff" />
+              <Text style={styles.processingText}>Processing image...</Text>
+            </View>
+          )}
+
+          {/* Predictions Display */}
+          {predictions && (
+            <View style={styles.predictionsContainer}>
+              <Text style={styles.predictionsText}>
+                Predictions: {JSON.stringify(predictions, null, 2)}
+              </Text>
+            </View>
+          )}
+
+          {/* Image Preview Controls */}
           <View style={styles.bottomControlsContainer}>
-            <Button icon="flip-camera-android" onPress={() => setImage(null)} />
+            <Button 
+              icon="flip-camera-android" 
+              onPress={() => {
+                setImage(null);
+                setPredictions(null);
+              }} 
+            />
+            <Button 
+              icon="photo-library" 
+              onPress={pickImageFromGallery} 
+            />
             <Button icon="check" onPress={savePicture} />
           </View>
         </>
@@ -233,6 +367,7 @@ export default function App() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -287,5 +422,29 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 50,
+  },
+  processingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  processingText: {
+    color: "#ffffff",
+    marginTop: 10,
+    fontSize: 16,
+  },
+  predictionsContainer: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: 10,
+    borderRadius: 5,
+  },
+  predictionsText: {
+    color: "#ffffff",
+    fontSize: 14,
   },
 });

@@ -25,7 +25,7 @@ const SignIn = () => {
 
      try {
        // Ari ilisan ang url paras databsae api
-       const response = await axios.post('http://192.168.1.9:5000/login', {
+       const response = await axios.post('http://192.168.1.7:5000/login', {
          username: form.username,
          password: form.password
        });
