@@ -5,11 +5,15 @@ import {
   Image,
   ImageBackground,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import axios from "axios";
+import { TextInput } from "react-native-paper";
+import { Dropdown } from "react-native-element-dropdown";
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -27,8 +31,31 @@ const SignUp = () => {
     password: "",
     confirmpassword: "",
   });
+
+  const data = [
+    { label: "Male", value: "1" },
+    { label: "Female", value: "2" },
+    { label: "Prefer not to say", value: "3" },
+  ];
+
+  const [expanded, setExpanded] = React.useState(true);
+
+  const handlePress = () => setExpanded(!expanded);
+
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [conPasswordVisible, setConPasswordVisible] = useState(false);
+  const [secureText, setSecureText] = useState(true);
+
+  const togglePasswordVisibility = () => setSecureText(!secureText);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGender, setSelectedGender] = useState(null);
+
+  const [value, setValue] = useState(null);
+  const [isFocus, setIsFocus] = useState(false);
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
 
   const handleSignUp = async () => {
     // Basic validation
@@ -68,107 +95,152 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className="h-full">
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <ImageBackground
-        source={images.backgroundmain}
-        className="flex-1"
+        source={images.background_signup}
+        className="flex-1 h-full"
         resizeMode="cover"
-        imageStyle={{ opacity: 0.1 }}
       >
-        <ScrollView>
-          <View className="w-full justify-center h-full p-7">
+        <View className="flex-1 h-full justify-center">
+          <View className="w-full justify-center px-7">
             <View className="flex-row items-center">
               <Image
                 source={images.logo}
                 resizeMode="contain"
-                className="w-[75px] h-[70px] mr-3"
+                className="w-[100px] h-[100px] mr-3"
               />
-              <Text className="font-pregular text-3xl">PAL-AI</Text>
+              <Text className="font-psemibold text-3xl">PAL-AI</Text>
             </View>
-            <Text className="font-psemibold text-4xl mt-6">Sign-up</Text>
-            <Text className="text-lg">Please enter your details</Text>
-            <View className="flex-row w-full justify-between">
-              <FormField
-                title="First Name"
+            <Text className="font-psemibold text-3xl mt-6">Sign-Up</Text>
+            <Text className="text-lg">Please enter the details.</Text>
+            <View className="flex-row w-full justify-between mt-3">
+              <TextInput
+                label="First Name"
                 value={form.firstname}
-                handleChangeText={(e) => setForm({ ...form, firstname: e })}
-                otherStyles="mt-7 w-[48%]"
-                keyboardType="default"
+                onChangeText={(e) => setForm({ ...form, firstname: e })}
+                className="w-[48%]"
+                mode="outlined"
+                activeOutlineColor="#006400"
+                outlineColor="#CBD2E0"
+                textColor="#2D3648"
               />
-              <FormField
-                title="Last Name"
+              <TextInput
+                label="Last Name"
                 value={form.lastname}
-                handleChangeText={(e) => setForm({ ...form, lastname: e })}
-                otherStyles="mt-7 w-[48%]"
-                keyboardType="default"
+                onChangeText={(e) => setForm({ ...form, lastname: e })}
+                className="w-[48%]"
+                mode="outlined"
+                activeOutlineColor="#006400"
+                outlineColor="#CBD2E0"
+                textColor="#2D3648"
               />
             </View>
-            <View className="flex-row w-full justify-between">
-              <FormField
-                title="Age"
+            <View className="flex-row w-full justify-between mt-1">
+              <TextInput
+                label="Age"
                 value={form.age}
-                handleChangeText={(e) => setForm({ ...form, age: e })}
-                otherStyles="mt-7 w-[48%]"
                 keyboardType="numeric"
+                onChangeText={(e) => setForm({ ...form, age: e })}
+                className="w-[48%]"
+                mode="outlined"
+                activeOutlineColor="#006400"
+                outlineColor="#CBD2E0"
+                textColor="#2D3648"
               />
-              <CustomDropdown
-                title="Select Gender"
-                value={selectedGender}
-                placeholder="Select Gender"
-                data={[
-                  { label: "Male", value: "Male" },
-                  { label: "Female", value: "Female" },
-                  { label: "Prefer not to say", value: "Prefer not to say" },
-                ]}
-                handleChange={(value) => setSelectedGender(value)}
-                otherStyles="mt-6 w-[48%]"
-              />
+              <View className="w-[48%] bg-white border border-[#CBD2E0] rounded-[5px] p-2 mt-[6px]">
+                <Dropdown
+                  className="mx-[5px] align-middle my-[6px]"
+                  placeholderStyle="text-base"
+                  selectedTextStyle="text-base"
+                  inputSearchStyle="text-base"
+                  iconStyle="mr-2"
+                  data={data}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? "Gender" : "Gender"}
+                  value={value}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  keyboardAvoiding="true"
+                  onChange={(item) => {
+                    setValue(item.value);
+                    setIsFocus(false);
+                  }}
+                />
+              </View>
             </View>
-            <FormField
-              title="Email"
+            <TextInput
+              label="Email"
               value={form.email}
-              handleChangeText={(e) => setForm({ ...form, email: e })}
-              otherStyles="mt-2"
-              keyboardType="email-address"
+              onChangeText={(e) => setForm({ ...form, email: e })}
+              className="w-full mt-1"
+              mode="outlined"
+              activeOutlineColor="#006400"
+              outlineColor="#CBD2E0"
+              textColor="#2D3648"
             />
-            <FormField
-              title="Mobile Number"
+            <TextInput
+              label="Mobile Number"
               value={form.mobilenumber}
-              handleChangeText={(e) => setForm({ ...form, mobilenumber: e })}
-              otherStyles="mt-2"
               keyboardType="numeric"
+              onChangeText={(e) => setForm({ ...form, mobilenumber: e })}
+              className="w-full mt-1"
+              mode="outlined"
+              activeOutlineColor="#006400"
+              outlineColor="#CBD2E0"
+              textColor="#2D3648"
             />
-            <FormField
-              title="Username"
+            <TextInput
+              label="Username"
               value={form.username}
-              handleChangeText={(e) => setForm({ ...form, username: e })}
-              otherStyles="mt-2"
-              keyboardType="default"
+              onChangeText={(e) => setForm({ ...form, username: e })}
+              className="w-full mt-1"
+              mode="outlined"
+              activeOutlineColor="#006400"
+              outlineColor="#CBD2E0"
+              textColor="#2D3648"
             />
-            <FormField
-              title="Password"
-              value={form.password}
-              handleChangeText={(e) => setForm({ ...form, password: e })}
-              otherStyles="mt-2"
-              keyboardType="password"
-              secureTextEntry
+            <TextInput
+              label="Password"
+              secureTextEntry={!passwordVisible}
+              right={
+                <TextInput.Icon
+                  icon={passwordVisible ? "eye-off" : "eye"}
+                  color="#006400"
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                />
+              }
+              className="w-full mt-1"
+              mode="outlined"
+              activeOutlineColor="#006400"
+              outlineColor="#CBD2E0"
+              textColor="#2D3648"
             />
-            <FormField
-              title="Confirm Password"
-              value={form.confirmpassword}
-              handleChangeText={(e) => setForm({ ...form, confirmpassword: e })}
-              otherStyles="mt-2"
-              keyboardType="password"
-              secureTextEntry
+            <TextInput
+              label="Confirm Password"
+              secureTextEntry={!conPasswordVisible}
+              right={
+                <TextInput.Icon
+                  icon={conPasswordVisible ? "eye-off" : "eye"}
+                  color="#006400"
+                  onPress={() => setConPasswordVisible(!conPasswordVisible)}
+                />
+              }
+              className="w-full mt-1"
+              mode="outlined"
+              activeOutlineColor="#006400"
+              outlineColor="#CBD2E0"
+              textColor="#2D3648"
             />
             <CustomButton
               title="Sign Up"
-              handlePress={handleSignUp}
-              containerStyles="w-full mt-7"
+              //Ichange lang dri if need muregister {handleSignup}, if deretso sa home kay () => router.push("/sign-up")
+              handlePress={() => router.push("/home")}
+              containerStyles="w-full mt-6"
               isLoading={isSubmitting}
             />
-            <View className="items-center flex-1">
-              <Text className="mt-2 font-pregular text-sm text-[#4B4B4B]">
+            <View className="items-center">
+              <Text className="mt-3 font-pregular text-sm text-[#4B4B4B]">
                 Already a user?{" "}
                 <Link href="/sign-in" className="font-psemibold text-secondary">
                   Log in
@@ -176,9 +248,16 @@ const SignUp = () => {
               </Text>
             </View>
           </View>
-        </ScrollView>
+        </View>
+        <View className="items-center justify-center">
+          <Text className="my-2 font-pregular text-[12px] text-[#4B4B4B] text-center">
+            By joining, you accept the{" "}
+            <Text className="text-secondary">Privacy Policy</Text> and{" "}
+            <Text className="text-secondary">Terms of Use</Text>
+          </Text>
+        </View>
       </ImageBackground>
-    </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
