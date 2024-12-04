@@ -16,7 +16,7 @@ import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton";
 import { router } from "expo-router";
 
-const API_URL = "http://192.168.1.38:8081/predict";
+const API_URL = "http://192.168.1.2:5000/predict";
 
 export default function App() {
   // Permissions hooks
