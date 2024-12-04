@@ -44,11 +44,7 @@ const SignUp = () => {
 
     setIsSubmitting(true);
     try {
-<<<<<<< HEAD
       const response = await axios.post('http://192.168.1.2:5000/signup', {
-=======
-      const response = await axios.post("http://192.168.1.38:5000/signup", {
->>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414
         username: form.username,
         email: form.email,
         password: form.password,

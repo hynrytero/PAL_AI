@@ -16,11 +16,7 @@ import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton";
 import { router } from "expo-router";
 
-<<<<<<< HEAD:PAL-AI-main/app/(tabs)/camera.jsx
 const API_URL = "http://192.168.1.2:5000/predict";
-=======
-const API_URL = "http://192.168.1.38:5000/predict";
->>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414:PAL-AI-main/app/(screen)/camera.jsx
 
 export default function App() {
   // Permissions hooks
@@ -140,11 +136,7 @@ export default function App() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
         setImage(selectedImage.uri);
-<<<<<<< HEAD:PAL-AI-main/app/(tabs)/camera.jsx
          
-=======
-
->>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414:PAL-AI-main/app/(screen)/camera.jsx
         // Send selected image to API
         // const predictions = await sendImageToAPI(selectedImage.uri)
       }
@@ -350,7 +342,6 @@ export default function App() {
 
           {/* Image Preview Controls */}
           <View style={styles.bottomControlsContainer}>
-<<<<<<< HEAD:PAL-AI-main/app/(tabs)/camera.jsx
           <Button
               icon="arrow-back"
               onPress={() => router.push("camera")}
@@ -374,18 +365,6 @@ export default function App() {
             }} 
           />
         </View>
-=======
-            <Button
-              icon="flip-camera-android"
-              onPress={() => {
-                setImage(null);
-                setPredictions(null);
-              }}
-            />
-            <Button icon="photo-library" onPress={pickImageFromGallery} />
-            <Button icon="check" onPress={savePicture} />
-          </View>
->>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414:PAL-AI-main/app/(screen)/camera.jsx
         </>
       )}
     </View>
