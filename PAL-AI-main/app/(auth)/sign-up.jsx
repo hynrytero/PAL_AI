@@ -1,8 +1,15 @@
-import { View, Text, ScrollView, Image, ImageBackground, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  ImageBackground,
+  Alert,
+} from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
-import axios from 'axios';
+import axios from "axios";
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -37,7 +44,7 @@ const SignUp = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post('http://192.168.56.1/signup', {
+      const response = await axios.post("http://192.168.1.38:5000/signup", {
         username: form.username,
         email: form.email,
         password: form.password,
@@ -45,13 +52,16 @@ const SignUp = () => {
         lastname: form.lastname,
         age: form.age,
         gender: selectedGender,
-        mobilenumber: form.mobilenumber
+        mobilenumber: form.mobilenumber,
       });
 
       Alert.alert("Success", "Account created successfully");
       router.push("/sign-in");
     } catch (error) {
-      Alert.alert("Error", error.response?.data?.message || "Registration failed");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Registration failed"
+      );
     } finally {
       setIsSubmitting(false);
     }
