@@ -1,7 +1,9 @@
 import bookmark from "../assets/icons/bookmark.png";
-import home from "../assets/icons/home.png";
+import home from "../assets/icons/homeicon.png";
+import profile from "../assets/icons/profileicon.png";
+import clock from "../assets/icons/clockicon.png";
+import bell from "../assets/icons/bellicon.png";
 import plus from "../assets/icons/plus.png";
-import profile from "../assets/icons/profile.png";
 import leftArrow from "../assets/icons/left-arrow.png";
 import menu from "../assets/icons/menu.png";
 import search from "../assets/icons/search.png";
@@ -12,15 +14,22 @@ import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
 import camera from "../assets/icons/camera.png";
+import pin from "../assets/icons/pin.png";
+import eye1 from "../assets/icons/eye1.png";
+import drop from "../assets/icons/drop.png";
+import wind from "../assets/icons/wind.png";
 
 export default {
+  home,
+  profile,
+  clock,
+  bell,
   play,
   bookmark,
-  home,
   plus,
-  profile,
   leftArrow,
   menu,
+  pin,
   search,
   upload,
   rightArrow,
@@ -28,4 +37,7 @@ export default {
   eyeHide,
   eye,
   camera,
+  eye1,
+  drop,
+  wind,
 };

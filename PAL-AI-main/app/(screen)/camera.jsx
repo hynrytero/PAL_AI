@@ -16,7 +16,7 @@ import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton";
 import { router } from "expo-router";
 
-const API_URL = "http://192.168.1.2:5000/predict";
+const API_URL = "http://192.168.1.38:8081/predict";
 
 export default function App() {
   // Permissions hooks
@@ -136,7 +136,7 @@ export default function App() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
         setImage(selectedImage.uri);
-         
+
         // Send selected image to API
         // const predictions = await sendImageToAPI(selectedImage.uri)
       }
@@ -161,7 +161,6 @@ export default function App() {
         //send result values to result window
 
         router.push("result");
-
       } catch (err) {
         console.log("Error while saving the picture:", err);
         Alert.alert("Error", "Failed to save picture");
@@ -342,29 +341,29 @@ export default function App() {
 
           {/* Image Preview Controls */}
           <View style={styles.bottomControlsContainer}>
-          <Button
-              icon="arrow-back"
-              onPress={() => router.push("camera")}
+            <Button icon="arrow-back" onPress={() => router.push("camera")} />
+            <Button
+              icon="photo-library"
+              onPress={() => {
+                setImage(null);
+                setPredictions(null);
+                pickImageFromGallery();
+              }}
             />
-          <Button icon="photo-library" onPress={() => {
-            setImage(null);
-            setPredictions(null);
-            pickImageFromGallery();
-          }} />
-          <Button 
-            icon="check" 
-            onPress={async () => {
-              try {
-                // Optional: Add any pre-save processing or validation
-                const predictionsResult = await sendImageToAPI(image);
-                console.log("Predictions:", predictionsResult);
-                await savePicture();
-              } catch (error) {
-                console.error('Error saving picture:', error);
-              }
-            }} 
-          />
-        </View>
+            <Button
+              icon="check"
+              onPress={async () => {
+                try {
+                  // Optional: Add any pre-save processing or validation
+                  const predictionsResult = await sendImageToAPI(image);
+                  console.log("Predictions:", predictionsResult);
+                  await savePicture();
+                } catch (error) {
+                  console.error("Error saving picture:", error);
+                }
+              }}
+            />
+          </View>
         </>
       )}
     </View>
