@@ -1,4 +1,13 @@
-import { ScrollView, Text, View, Image, ImageBackground } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  ImageBackground,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { Link, Redirect, router, Router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";

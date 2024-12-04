@@ -15,8 +15,9 @@ import * as FileSystem from "expo-file-system";
 import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
-const API_URL = "http://192.168.1.38:8081/predict";
+const API_URL = "http://192.168.1.38:5000/predict";
 
 export default function App() {
   // Permissions hooks
@@ -354,7 +355,6 @@ export default function App() {
               icon="check"
               onPress={async () => {
                 try {
-                  // Optional: Add any pre-save processing or validation
                   const predictionsResult = await sendImageToAPI(image);
                   console.log("Predictions:", predictionsResult);
                   await savePicture();
@@ -366,6 +366,7 @@ export default function App() {
           </View>
         </>
       )}
+      <StatusBar style="light" />
     </View>
   );
 }
@@ -375,7 +376,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    marginTop: 30,
   },
   grantContainer: {
     flex: 1,
@@ -388,6 +388,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+    paddingTop: 40,
   },
   button: {
     backgroundColor: "blue",

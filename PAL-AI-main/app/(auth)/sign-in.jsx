@@ -10,6 +10,8 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import axios from "axios";
+import { TextInput } from "react-native-paper";
+
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
@@ -22,6 +24,7 @@ const SignIn = () => {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
     // Validate input
@@ -34,7 +37,7 @@ const SignIn = () => {
 
     try {
       // Make login request to your backend
-      const response = await axios.post("http://192.168.1.38:8081/login", {
+      const response = await axios.post("http://192.168.1.38:5000/login", {
         username: form.username,
         password: form.password,
       });
@@ -60,60 +63,73 @@ const SignIn = () => {
   };
 
   return (
-    <SafeAreaView className="h-full">
-      <ImageBackground
-        source={images.backgroundmain}
-        className="flex-1 h-[100%]"
-        resizeMode="cover"
-        imageStyle={{ opacity: 0.03 }}
-      >
-        <ScrollView>
-          <View className="w-full justify-center min-h-[85vh] p-7">
-            <View className="flex-row items-center">
-              <Image
-                source={images.logo}
-                resizeMode="contain"
-                className="w-[75px] h-[70px] mr-3"
-              />
-              <Text className="font-pregular text-3xl">PAL-AI</Text>
-            </View>
-            <Text className="font-psemibold text-4xl mt-6">Log in</Text>
-            <Text className="text-lg text-gray-500">
-              Welcome! Please enter your details.
-            </Text>
-            <FormField
-              title="Username"
-              value={form.username}
-              handleChangeText={(e) => setForm({ ...form, username: e })}
-              otherStyles="mt-7"
-              keyboardType="default"
+    <ImageBackground
+      source={images.background_signin}
+      className="flex-1 h-full"
+      resizeMode="cover"
+    >
+      <View className="flex-1 h-full justify-center">
+        <View className="w-full justify-center p-7">
+          <View className="flex-row items-center">
+            <Image
+              source={images.logo}
+              resizeMode="contain"
+              className="w-[100px] h-[100px] mr-3"
             />
-            <FormField
-              title="Password"
-              value={form.password}
-              handleChangeText={(e) => setForm({ ...form, password: e })}
-              otherStyles="mt-5"
-              keyboardType="password"
-              secureTextEntry={true}
-            />
-            <CustomButton
-              title="Log in"
-              handlePress={handleLogin}
-              containerStyles="w-full mt-5"
-              isLoading={isSubmitting}
-            />
-            <View className="items-center flex-1">
-              <Text className="mt-3 font-pregular text-sm text-[#4B4B4B]">
-                Need an account?{" "}
-                <Link href="/sign-up" className="font-psemibold text-secondary">
-                  Sign up
-                </Link>
-              </Text>
-            </View>
+            <Text className="font-psemibold text-3xl">PAL-AI</Text>
           </View>
-        </ScrollView>
-      </ImageBackground>
-    </SafeAreaView>
+          <Text className="font-psemibold text-3xl mt-6">Log in</Text>
+          <Text className="text-lg">Welcome! Please enter your details.</Text>
+          <TextInput
+            label="Username"
+            value={form.username}
+            onChangeText={(e) => setForm({ ...form, username: e })}
+            className="w-full mt-3"
+            mode="outlined"
+            activeOutlineColor="#006400"
+            outlineColor="#CBD2E0"
+            textColor="#2D3648"
+          />
+          <TextInput
+            label="Password"
+            secureTextEntry={!passwordVisible}
+            right={
+              <TextInput.Icon
+                icon={passwordVisible ? "eye-off" : "eye"}
+                color="#006400"
+                onPress={() => setPasswordVisible(!passwordVisible)}
+              />
+            }
+            className="w-full mt-1"
+            mode="outlined"
+            activeOutlineColor="#006400"
+            outlineColor="#CBD2E0"
+            textColor="#2D3648"
+          />
+          <CustomButton
+            title="Log in"
+            handlePress={handleLogin}
+            containerStyles="w-full mt-5"
+            isLoading={isSubmitting}
+          />
+          <View className="items-center">
+            <Text className="mt-3 font-pregular text-sm text-[#4B4B4B]">
+              Need an account?{" "}
+              <Link href="/sign-up" className="font-psemibold text-secondary">
+                Sign up
+              </Link>
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View className="items-center justify-center">
+        <Text className="my-2 font-pregular text-[12px] text-[#4B4B4B] text-center">
+          By joining, you accept the{" "}
+          <Text className="text-secondary">Privacy Policy</Text> and{" "}
+          <Text className="text-secondary">Terms of Use</Text>
+        </Text>
+      </View>
+    </ImageBackground>
   );
 };
 
