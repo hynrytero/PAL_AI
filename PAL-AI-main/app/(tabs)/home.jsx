@@ -7,8 +7,14 @@ import { images, icons } from "../../constants";
 import { Link, Redirect, router, Router } from "expo-router";
 
 const Home = () => {
+  
   const handleFABPress = () => {
     console.log("FAB with Camera Pressed!");
+  };
+
+  // para logout puhon
+  const handleLogout = () => {
+    logout();   
   };
 
   return (

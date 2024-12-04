@@ -16,7 +16,7 @@ import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton"; 
 import { router } from "expo-router";
 
-const API_URL = "http://192.168.1.7:5000/predict";
+const API_URL = "http://192.168.1.2:5000/predict";
 
 export default function App() {
   // Permissions hooks
@@ -104,8 +104,6 @@ export default function App() {
         const picture = await cameraRef.current.takePictureAsync();
         setImage(picture.uri);
         // Automatically send to API when picture is taken
-        const predictions = await sendImageToAPI(picture.uri);
-        console.log("Predictions:", predictions);
       } catch (err) {
         console.log("Error while taking/processing the picture:", err);
         Alert.alert("Error", "Failed to process image");
@@ -135,10 +133,9 @@ export default function App() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
         setImage(selectedImage.uri);
-        
+         
         // Send selected image to API
-        const predictions = await sendImageToAPI(selectedImage.uri);
-        console.log("Predictions:", predictions);
+        // const predictions = await sendImageToAPI(selectedImage.uri)
       }
     } catch (error) {
       console.error("Error picking image:", error);
@@ -151,10 +148,17 @@ export default function App() {
     if (image) {
       try {
         const asset = await MediaLibrary.createAssetAsync(image);
-        Alert.alert("Success", "Photo saved!");
-        setImage(null);
-        setPredictions(null);
+        //Alert.alert("Success", "Photo saved!");
+        // setImage(null);
+        // setPredictions(null);
         getLastSavedImage();
+
+        //send values to database
+
+        //send result values to result window
+
+        router.push("result");
+
       } catch (err) {
         console.log("Error while saving the picture:", err);
         Alert.alert("Error", "Failed to save picture");
@@ -333,34 +337,35 @@ export default function App() {
           {isProcessing && (
             <View style={styles.processingOverlay}>
               <ActivityIndicator size="large" color="#ffffff" />
-              <Text style={styles.processingText}>Processing image...</Text>
-            </View>
-          )}
-
-          {/* Predictions Display */}
-          {predictions && (
-            <View style={styles.predictionsContainer}>
-              <Text style={styles.predictionsText}>
-                Predictions: {JSON.stringify(predictions, null, 2)}
-              </Text>
+              <Text style={styles.processingText}>Processing Image...</Text>
             </View>
           )}
 
           {/* Image Preview Controls */}
           <View style={styles.bottomControlsContainer}>
-            <Button 
-              icon="flip-camera-android" 
-              onPress={() => {
-                setImage(null);
-                setPredictions(null);
-              }} 
+          <Button
+              icon="arrow-back"
+              onPress={() => router.push("camera")}
             />
-            <Button 
-              icon="photo-library" 
-              onPress={pickImageFromGallery} 
-            />
-            <Button icon="check" onPress={savePicture} />
-          </View>
+          <Button icon="photo-library" onPress={() => {
+            setImage(null);
+            setPredictions(null);
+            pickImageFromGallery();
+          }} />
+          <Button 
+            icon="check" 
+            onPress={async () => {
+              try {
+                // Optional: Add any pre-save processing or validation
+                const predictionsResult = await sendImageToAPI(image);
+                console.log("Predictions:", predictionsResult);
+                await savePicture();
+              } catch (error) {
+                console.error('Error saving picture:', error);
+              }
+            }} 
+          />
+        </View>
         </>
       )}
     </View>

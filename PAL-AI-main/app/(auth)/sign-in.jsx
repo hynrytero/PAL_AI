@@ -6,8 +6,10 @@ import axios from "axios";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
+import { useAuth } from "../../context/AuthContext"; // Import the useAuth hook
 
 const SignIn = () => {
+   const { login } = useAuth(); // Use the login function from AuthContext
    const [form, setForm] = useState({
      username: "",
      password: "",
@@ -24,14 +26,19 @@ const SignIn = () => {
      setIsSubmitting(true);
 
      try {
-       // Ari ilisan ang url paras databsae api
-       const response = await axios.post('http://192.168.1.7:5000/login', {
+       // Make login request to your backend
+       const response = await axios.post('http://192.168.1.2:5000/login', {
          username: form.username,
          password: form.password
        });
-
-       // Handle successful login ari dapita
+       console.log('Response data:', response.data);
+       // Handle successful login
        if (response.data.user) {
+        console.log('Username:' + response.data.user.username);
+        console.log('userId:' + response.data.user.id);
+         // Use the login function from AuthContext to store user info
+         await login(response.data.user.id, response.data.user.username);
+         
          Alert.alert("Success", "Login Successful");
          // Navigate to home screen
          router.push("home");
@@ -101,7 +108,6 @@ const SignIn = () => {
        </ImageBackground>
      </SafeAreaView>
    );
-
 };
 
 export default SignIn;

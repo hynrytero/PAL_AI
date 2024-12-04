@@ -37,7 +37,7 @@ const SignUp = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post('http://192.168.56.1/signup', {
+      const response = await axios.post('http://192.168.1.2:5000/signup', {
         username: form.username,
         email: form.email,
         password: form.password,
