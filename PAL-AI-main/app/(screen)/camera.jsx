@@ -10,20 +10,24 @@ import {
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
-import * as ImagePicker from "expo-image-picker"; 
+import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import Slider from "@react-native-community/slider";
-import Button from "../../components/CameraButton"; 
+import Button from "../../components/CameraButton";
 import { router } from "expo-router";
 
+<<<<<<< HEAD:PAL-AI-main/app/(tabs)/camera.jsx
 const API_URL = "http://192.168.1.2:5000/predict";
+=======
+const API_URL = "http://192.168.1.38:5000/predict";
+>>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414:PAL-AI-main/app/(screen)/camera.jsx
 
 export default function App() {
   // Permissions hooks
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [mediaLibraryPermissionResponse, requestMediaLibraryPermission] =
     MediaLibrary.usePermissions();
-  const [imagePickerPermission, requestImagePickerPermission] = 
+  const [imagePickerPermission, requestImagePickerPermission] =
     ImagePicker.useMediaLibraryPermissions();
 
   // Camera and image state
@@ -70,7 +74,7 @@ export default function App() {
     try {
       setIsProcessing(true);
       const base64Image = await imageToBase64(imageUri);
-      
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -118,7 +122,10 @@ export default function App() {
       if (!imagePickerPermission?.granted) {
         const permissionResult = await requestImagePickerPermission();
         if (!permissionResult.granted) {
-          Alert.alert("Permission Required", "Gallery access is needed to select images.");
+          Alert.alert(
+            "Permission Required",
+            "Gallery access is needed to select images."
+          );
           return;
         }
       }
@@ -133,7 +140,11 @@ export default function App() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
         setImage(selectedImage.uri);
+<<<<<<< HEAD:PAL-AI-main/app/(tabs)/camera.jsx
          
+=======
+
+>>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414:PAL-AI-main/app/(screen)/camera.jsx
         // Send selected image to API
         // const predictions = await sendImageToAPI(selectedImage.uri)
       }
@@ -251,10 +262,7 @@ export default function App() {
         <>
           {/* Top Camera Controls */}
           <View style={styles.topControlsContainer}>
-            <Button
-              icon="arrow-back"
-              onPress={() => router.push("/home")}
-            />
+            <Button icon="arrow-back" onPress={() => router.push("/home")} />
             <Button
               icon={cameraProps.flash === "on" ? "flash-on" : "flash-off"}
               onPress={() => toggleProperty("flash", "on", "off")}
@@ -301,8 +309,7 @@ export default function App() {
 
           {/* Bottom Controls */}
           <View style={styles.bottomControlsContainer}>
-            {        
-            /* <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => previousImage && setImage(previousImage)}
             >
               <Image
@@ -313,7 +320,7 @@ export default function App() {
             <Button
               icon="photo-library"
               onPress={pickImageFromGallery}
-              size={40}           
+              size={40}
             />
             <Button
               icon="camera"
@@ -332,7 +339,7 @@ export default function App() {
         <>
           {/* Image Preview */}
           <Image source={{ uri: image }} style={styles.camera} />
-          
+
           {/* Processing Overlay */}
           {isProcessing && (
             <View style={styles.processingOverlay}>
@@ -343,6 +350,7 @@ export default function App() {
 
           {/* Image Preview Controls */}
           <View style={styles.bottomControlsContainer}>
+<<<<<<< HEAD:PAL-AI-main/app/(tabs)/camera.jsx
           <Button
               icon="arrow-back"
               onPress={() => router.push("camera")}
@@ -356,6 +364,7 @@ export default function App() {
             icon="check" 
             onPress={async () => {
               try {
+                // Optional: Add any pre-save processing or validation
                 const predictionsResult = await sendImageToAPI(image);
                 console.log("Predictions:", predictionsResult);
                 await savePicture();
@@ -365,6 +374,18 @@ export default function App() {
             }} 
           />
         </View>
+=======
+            <Button
+              icon="flip-camera-android"
+              onPress={() => {
+                setImage(null);
+                setPredictions(null);
+              }}
+            />
+            <Button icon="photo-library" onPress={pickImageFromGallery} />
+            <Button icon="check" onPress={savePicture} />
+          </View>
+>>>>>>> 32c6122ec66e5bb74eebf06f084eb32eb69da414:PAL-AI-main/app/(screen)/camera.jsx
         </>
       )}
     </View>

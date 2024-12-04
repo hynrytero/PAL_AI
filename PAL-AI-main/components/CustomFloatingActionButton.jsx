@@ -13,19 +13,19 @@ const CustomFAB = ({ onPress, iconSource, style }) => {
 const styles = StyleSheet.create({
   fab: {
     position: "absolute",
-    bottom: 20,
-    right: 20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#228B22", // Default FAB color
+    bottom: 40, // Adjust based on your tab bar height
+    alignSelf: "center",
+    backgroundColor: "#2C9C4B", // Green background for FAB
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
-    elevation: 4, // Shadow for Android
+    elevation: 5, // Adds shadow for Android
+    shadowColor: "#000", // Adds shadow for iOS
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   icon: {
     width: 40,

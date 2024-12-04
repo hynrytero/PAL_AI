@@ -8,7 +8,6 @@ import { AuthProvider } from '../context/AuthContext';
 
 export default function App() {
   const router = useRouter();
-
   return (
     <AuthProvider>
       <SafeAreaView className="bg-[#ffffff] h-full">
