@@ -18,8 +18,8 @@ import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = "http://192.168.1.2:5000/predict";
-const API_DB = "http://192.168.1.2:5000/scan";
+const API_URL = "http://192.168.1.14:5000/predict";
+const API_DB = "http://192.168.1.14:5000/scan";
 
 
 export default function App() {

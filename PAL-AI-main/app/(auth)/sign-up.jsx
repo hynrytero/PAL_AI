@@ -59,19 +59,27 @@ const SignUp = () => {
 
   const handleSignUp = async () => {
     // Basic validation
-    if (form.password !== form.confirmpassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
-    }
+    if (!form.firstname || !form.lastname || !form.age || 
+      !form.email || !form.mobilenumber || !form.username || 
+      !form.password || !form.confirmpassword) {
+    Alert.alert("Error", "Please fill in all required fields");
+    return;
+  }
 
-    if (!form.username || !form.email || !form.password) {
-      Alert.alert("Error", "Please fill in all required fields");
-      return;
-    }
+  if (form.password !== form.confirmpassword) {
+    Alert.alert("Error", "Passwords do not match");
+    return;
+  }
+
+  // Additional validation for specific fields
+  if (!selectedGender) {
+    Alert.alert("Error", "Please select a gender");
+    return;
+  }
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post("http://192.168.1.2:5000/signup", {
+      const response = await axios.post("http://192.168.1.14:5000/signup", {
         username: form.username,
         email: form.email,
         password: form.password,
@@ -157,14 +165,11 @@ const SignUp = () => {
                   data={data}
                   labelField="label"
                   valueField="value"
-                  placeholder={!isFocus ? "Gender" : "Gender"}
-                  value={value}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  keyboardAvoiding="true"
+                  placeholder="Gender"
+                  value={selectedGender}
                   onChange={(item) => {
+                    setSelectedGender(item.value);
                     setValue(item.value);
-                    setIsFocus(false);
                   }}
                 />
               </View>
@@ -202,6 +207,8 @@ const SignUp = () => {
             />
             <TextInput
               label="Password"
+              value={form.password}
+              onChangeText={(e) => setForm({ ...form, password: e })}
               secureTextEntry={!passwordVisible}
               right={
                 <TextInput.Icon
@@ -218,7 +225,8 @@ const SignUp = () => {
             />
             <TextInput
               label="Confirm Password"
-              secureTextEntry={!conPasswordVisible}
+              value={form.confirmpassword}
+              onChangeText={(e) => setForm({ ...form, confirmpassword: e })}
               right={
                 <TextInput.Icon
                   icon={conPasswordVisible ? "eye-off" : "eye"}
@@ -235,7 +243,7 @@ const SignUp = () => {
             <CustomButton
               title="Sign Up"
               //Ichange lang dri if need muregister {handleSignup}, if deretso sa home kay () => router.push("/sign-up")
-              handlePress={() => router.push("/sign-in")}
+              handlePress={handleSignUp}
               containerStyles="w-full mt-6"
               isLoading={isSubmitting}
             />
