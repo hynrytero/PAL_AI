@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Link, Redirect, router, Router, Tabs } from "expo-router";
-
+import { AuthProvider } from "../../context/AuthContext";
 import { icons } from "../../constants";
 import { Icon } from "react-native-paper";
 import CustomFAB from "../../components/CustomFloatingActionButton";
@@ -27,6 +27,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
 
 const TabsLayout = () => {
   return (
+    <AuthProvider>
     <>
       {/* This code is for bottom navigation bar */}
       <Tabs
@@ -81,15 +82,30 @@ const TabsLayout = () => {
           options={{
             title: "Camera",
             headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon color="#2C9C4B" name="Capture" />
-            ),
-            tabBarLabel: ({ color }) => (
-              <Text
-                style={{ color: "#2C9C4B", fontWeight: "bold", fontSize: 12 }}
+            // Non-interactive custom tab button
+            tabBarButton: (props) => (
+              <View
+                style={[
+                  props.style,
+                  {
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 57, 
+                  },
+                ]}
               >
-                Capture
-              </Text>
+                <TabIcon color="#2C9C4B" />
+                <Text 
+                  style={{ 
+                    color: "#2C9C4B", 
+                    fontWeight: "bold", 
+                    fontSize: 12, 
+                    marginTop: 5,
+                  }}
+                >
+                  Capture
+                </Text>
+              </View>
             ),
           }}
         />
@@ -132,6 +148,7 @@ const TabsLayout = () => {
       />
       <StatusBar style="dark" />
     </>
+    </AuthProvider>
   );
 };
 

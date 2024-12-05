@@ -235,7 +235,7 @@ const SignUp = () => {
             <CustomButton
               title="Sign Up"
               //Ichange lang dri if need muregister {handleSignup}, if deretso sa home kay () => router.push("/sign-up")
-              handlePress={() => router.push("/home")}
+              handlePress={() => router.push("/sign-in")}
               containerStyles="w-full mt-6"
               isLoading={isSubmitting}
             />
@@ -249,16 +249,8 @@ const SignUp = () => {
             </View>
           </View>
         </View>
-        <View className="items-center justify-center">
-          <Text className="my-2 font-pregular text-[12px] text-[#4B4B4B] text-center">
-            By joining, you accept the{" "}
-            <Text className="text-secondary">Privacy Policy</Text> and{" "}
-            <Text className="text-secondary">Terms of Use</Text>
-          </Text>
-        </View>
       </ImageBackground>
     </TouchableWithoutFeedback>
   );
 };
-
 export default SignUp;

@@ -15,10 +15,10 @@ import { TextInput } from "react-native-paper";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
-import { useAuth } from "../../context/AuthContext"; // Import the useAuth hook
+import { useAuth } from "../../context/AuthContext";
 
 const SignIn = () => {
-  const { login } = useAuth(); // Use the login function from AuthContext
+  const { login } = useAuth();
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -36,25 +36,20 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      // Make login request to your backend
       const response = await axios.post("http://192.168.1.2:5000/login", {
         username: form.username,
         password: form.password,
       });
       console.log("Response data:", response.data);
-      // Handle successful login
+      
       if (response.data.user) {
         console.log("Username:" + response.data.user.username);
         console.log("userId:" + response.data.user.id);
-        // Use the login function from AuthContext to store user info
         await login(response.data.user.id, response.data.user.username);
-
         Alert.alert("Success", "Login Successful");
-        // Navigate to home screen
         router.push("home");
       }
     } catch (error) {
-      // Handle login errors
       const errorMsg = error.response?.data?.message || "Login failed";
       Alert.alert("Error", errorMsg);
     } finally {
@@ -83,7 +78,7 @@ const SignIn = () => {
           <TextInput
             label="Username"
             value={form.username}
-            onChangeText={(e) => setForm({ ...form, username: e })}
+            onChangeText={(text) => setForm({ ...form, username: text })}
             className="w-full mt-3"
             mode="outlined"
             activeOutlineColor="#006400"
@@ -92,6 +87,8 @@ const SignIn = () => {
           />
           <TextInput
             label="Password"
+            value={form.password}
+            onChangeText={(text) => setForm({ ...form, password: text })}
             secureTextEntry={!passwordVisible}
             right={
               <TextInput.Icon
@@ -121,13 +118,6 @@ const SignIn = () => {
             </Text>
           </View>
         </View>
-      </View>
-      <View className="items-center justify-center">
-        <Text className="my-2 font-pregular text-[12px] text-[#4B4B4B] text-center">
-          By joining, you accept the{" "}
-          <Text className="text-secondary">Privacy Policy</Text> and{" "}
-          <Text className="text-secondary">Terms of Use</Text>
-        </Text>
       </View>
     </ImageBackground>
   );

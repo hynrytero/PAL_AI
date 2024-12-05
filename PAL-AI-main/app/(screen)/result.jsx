@@ -1,56 +1,93 @@
-import { View, Text, ImageBackground, ScrollView, Image } from "react-native";
-import React from "react";
-import { StatusBar } from "expo-status-bar";
+import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CustomButton from "../../components/CustomButton";
-import CustomButtonOutline from "../../components/CustomButtonOutline";
-
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { Link, Redirect, router, Router, useLocalSearchParams } from "expo-router";
+import React from "react";
 import { images } from "../../constants";
+import CustomButton from "../../components/CustomButton";
 
-const result = () => {
-  //const [isSubmitting, setisSubmitting] = useState(false);
+
+const Result = () => {
+
+  // Get the params passed from the previous screen
+  const params = useLocalSearchParams();
+  console.log('Received params:', params);
+  console.log('Image URI type:', typeof imageUri);
+  console.log('Image URI value:', imageUri);
+  console.log('FULL PARAMS:', JSON.stringify(params, null, 2));
+
+  const { 
+    imageUri = null, 
+    disease = "Unknown Disease", 
+    confidence = "0%", 
+    date = new Date().toLocaleDateString(), 
+    description = "No description available",
+    treatments = "No description available" 
+  } = params;
+  
+  console.log('EXTRACTED imageUri:', imageUri);
   return (
-    <SafeAreaView className="h-full">
-      <ImageBackground
-        source={images.backgroundmain}
-        className="flex-1"
-        resizeMode="cover"
-        imageStyle={{ opacity: 0.1 }}
+    <SafeAreaView className="flex-1">
+       <ScrollView 
+        className="flex-1 p-5"
+        contentContainerStyle={{ 
+          flexGrow: 1, 
+          paddingBottom: 50
+        }}
+        showsVerticalScrollIndicator={false} 
       >
-        <ScrollView>
-          <View className="flex-column items-center p-7">
-            <Text className="font-pmedium text-3xl mb-5">Results</Text>
-            <Image
-              source={images.background1}
-              resizeMode="cover"
-              className="w-full h-[350] mb-5"
-              borderRadius={20}
-            ></Image>
-            <Text className="font-pmedium text-2xl mb-1">Tungro Virus</Text>
-            <Text className="font-psemibold text-3xl">97%</Text>
-            <Text className="text-red-700 font-psemibold text-4xl">
-              WARNING!
-            </Text>
-            <Text className="font-pmedium text-2xl mb-1">
-              Tungro Virus detected!
-            </Text>
-            <CustomButton
-              title="Check Health"
-              //handlePress={() => router.push("result")}
-              containerStyles="w-full mt-5"
-              //isLoading={isSubmitting}
-            />
-            <CustomButtonOutline
-              title="Treatments"
-              //handlePress={() => router.push("result")}
-              containerStyles="w-full mt-5"
-              //isLoading={isSubmitting}
-            />
-          </View>
-        </ScrollView>
-      </ImageBackground>
+        {/* Header */}
+        <View className="flex-row items-center w-full mb-7">
+          <Icon
+            name="chevron-left"
+            size={40}
+            color="black"
+            onPress={() => router.back()}
+          />
+          <Text className="font-pmedium text-[30px]">Result</Text>
+        </View>
+
+        {/* Image */}
+        <Image
+          source={imageUri ? { uri: imageUri } : require("../../assets/images/background1.jpg")} // Replace with your fallback image path
+          resizeMode="cover"
+          className="w-full h-[275px] mb-5"
+          borderRadius={10}
+          onError={(e) => console.error("Image load error:", e.nativeEvent.error)}
+          onLoad={() => console.log("Image loaded successfully")}
+        />
+
+        {/* Disease and Date */}
+        <View className="flex-row justify-between w-full items-center mb-5">
+          <Text className="font-pmedium text-[25px]">{disease}</Text>
+          <Text className="font-pregular text-sm">{date}</Text>
+        </View>
+
+        {/* Confidence */}
+        <Text className="font-pregular text-lg mb-5">{confidence}</Text>
+
+        {/* Description */}
+        <Text className="font-pregular text-md leading-6">{description}</Text>
+
+        {/* Treatments Button */}
+          <CustomButton
+            title="Treatments"
+            handlePress={() => router.push({
+              pathname: "/treatment",
+              params: {
+                imageUri: imageUri,
+                disease: disease || "Unknown Disease", 
+                confidence: confidence, 
+                date: new Date().toLocaleDateString(),
+                description: description, 
+                treatments: treatments || "No treatments available",
+              }
+            })}
+            containerStyles="w-full mt-6"
+          />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default result;
+export default Result;
