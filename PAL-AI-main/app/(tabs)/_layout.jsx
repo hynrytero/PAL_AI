@@ -143,7 +143,7 @@ const TabsLayout = () => {
 
       {/* Floating Action Button */}
       <CustomFAB
-        onPress={() => router.push("result")}
+        onPress={() => router.push("camera")}
         iconSource={icons.camera}
       />
       <StatusBar style="dark" />

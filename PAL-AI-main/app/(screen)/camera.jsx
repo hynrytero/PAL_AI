@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
@@ -13,28 +12,19 @@ import * as MediaLibrary from "expo-media-library";
 import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton";
 import { router } from "expo-router";
-<<<<<<< HEAD
-import { StatusBar } from "expo-status-bar";
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from "../../context/AuthContext";
-
 const API_URL = "http://192.168.1.2:5000/predict";
 const API_DB = "http://192.168.1.2:5000/scan";
 
-=======
->>>>>>> d90cc904ae4c3186c465f5b67d94e496432d80d3
 
 export default function App() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-<<<<<<< HEAD
   const [mediaLibraryPermissionResponse, requestMediaLibraryPermission] = MediaLibrary.usePermissions();
   const [imagePickerPermission, requestImagePickerPermission] = ImagePicker.useMediaLibraryPermissions();
   const { user } = useAuth();
 
   // Camera and image state
-=======
-  const [mediaLibraryPermissionResponse, requestMediaLibraryPermission] =
-    MediaLibrary.usePermissions();
->>>>>>> d90cc904ae4c3186c465f5b67d94e496432d80d3
   const [cameraProps, setCameraProps] = useState({
     zoom: 0,
     facing: "back",
@@ -123,7 +113,6 @@ export default function App() {
     }
   };
 
-<<<<<<< HEAD
   // Pick image from gallery
   const pickImageFromGallery = async () => {
     try {
@@ -159,9 +148,6 @@ export default function App() {
     }
   };
 
-=======
-  //function to save the picture using MediaLibrary
->>>>>>> d90cc904ae4c3186c465f5b67d94e496432d80d3
   const savePicture = async () => {
 
     if (image) {
@@ -169,7 +155,6 @@ export default function App() {
 
         const predictionsResult = await sendImageToAPI(image);
         const asset = await MediaLibrary.createAssetAsync(image);
-<<<<<<< HEAD
        // console.log("Predictions:", predictionsResult);
         
         try {
@@ -211,12 +196,6 @@ export default function App() {
         }
       });
 
-=======
-        const assetInfo = await MediaLibrary.getAssetInfoAsync(asset.id);
-        Alert.alert("Photo saved!", image);
-        setImage(null);
-        getLastSavedImage();
->>>>>>> d90cc904ae4c3186c465f5b67d94e496432d80d3
       } catch (err) {
         console.log("Error while saving the picture : ", err);
       }
@@ -323,7 +302,6 @@ export default function App() {
         <>
           <Image source={{ uri: image }} style={styles.camera} />
           <View style={styles.bottomControlsContainer}>
-<<<<<<< HEAD
             <Button icon="arrow-back" onPress={() => router.push("camera")} />
             <Button
               icon="photo-library"
@@ -343,10 +321,6 @@ export default function App() {
                 }
               }}
             />
-=======
-            <Button icon="flip-camera-android" onPress={() => setImage(null)} />
-            <Button icon="check" onPress={savePicture} />
->>>>>>> d90cc904ae4c3186c465f5b67d94e496432d80d3
           </View>
         </>
       )}
