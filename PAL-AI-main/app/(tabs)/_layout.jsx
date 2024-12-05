@@ -65,7 +65,7 @@ const TabsLayout = () => {
           name="history"
           options={{
             title: "History",
-            headerShown: true,
+            headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.clock}
@@ -113,7 +113,7 @@ const TabsLayout = () => {
           name="notification"
           options={{
             title: "Notification",
-            headerShown: true,
+            headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.bell}
@@ -128,7 +128,7 @@ const TabsLayout = () => {
           name="profile"
           options={{
             title: "Profile",
-            headerShown: true,
+            headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.profile}
@@ -143,7 +143,7 @@ const TabsLayout = () => {
 
       {/* Floating Action Button */}
       <CustomFAB
-        onPress={() => router.push("camera")}
+        onPress={() => router.push("result")}
         iconSource={icons.camera}
       />
       <StatusBar style="dark" />

@@ -1,60 +1,23 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, Image } from "react-native";
 import React from "react";
 
-import { images } from "../constants";
-
-const Card = () => {
+const Card = ({ disease, desc, date, percent, color, image }) => {
   return (
-    <View style={styles.card}>
+    <View className="bg-white rounded-lg overflow-hidden m-3">
       <Image
-        source={images.backgroundmain} // Replace this with your desired image URL
-        style={styles.image}
+        source={image} // Replace this with your desired image URL
+        className="w-full h-52"
       />
-      <View style={styles.content}>
-        <Text style={styles.header}>Header</Text>
-        <Text style={styles.description}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua...
-        </Text>
-        <Text style={styles.timestamp}>8m ago</Text>
+      <View className={`p-3 ${color}`}>
+        <Text className="text-lg font-bold mb-1">{disease}</Text>
+        <Text className="text-sm text-gray-600 mb-3">{desc}</Text>
+        <Text className="text-xs text-gray-500">{date}</Text>
+      </View>
+      <View className="absolute top-2 right-2 bg-[#f1f1f1] px-2 py-1 rounded-md">
+        <Text className="text-sm font-semibold">{percent}%</Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    overflow: "hidden",
-    elevation: 3,
-    margin: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  image: {
-    width: "100%",
-    height: 200,
-  },
-  content: {
-    padding: 10,
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 10,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: "#999",
-  },
-});
 
 export default Card;
