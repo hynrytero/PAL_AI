@@ -36,12 +36,12 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post("http://192.168.1.14:5000/login", {
+      const response = await axios.post("http://192.168.1.2:5000/login", {
         username: form.username,
         password: form.password,
       });
       console.log("Response data:", response.data);
-      
+
       if (response.data.user) {
         console.log("Username:" + response.data.user.username);
         console.log("userId:" + response.data.user.id);
@@ -105,7 +105,8 @@ const SignIn = () => {
           />
           <CustomButton
             title="Log in"
-            handlePress={handleLogin}
+            // handlePress={handleLogin}
+            handlePress={() => router.push("home")}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />

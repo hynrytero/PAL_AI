@@ -59,27 +59,34 @@ const SignUp = () => {
 
   const handleSignUp = async () => {
     // Basic validation
-    if (!form.firstname || !form.lastname || !form.age || 
-      !form.email || !form.mobilenumber || !form.username || 
-      !form.password || !form.confirmpassword) {
-    Alert.alert("Error", "Please fill in all required fields");
-    return;
-  }
+    if (
+      !form.firstname ||
+      !form.lastname ||
+      !form.age ||
+      !form.email ||
+      !form.mobilenumber ||
+      !form.username ||
+      !form.password ||
+      !form.confirmpassword
+    ) {
+      Alert.alert("Error", "Please fill in all required fields");
+      return;
+    }
 
-  if (form.password !== form.confirmpassword) {
-    Alert.alert("Error", "Passwords do not match");
-    return;
-  }
+    if (form.password !== form.confirmpassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
 
-  // Additional validation for specific fields
-  if (!selectedGender) {
-    Alert.alert("Error", "Please select a gender");
-    return;
-  }
+    // Additional validation for specific fields
+    if (!selectedGender) {
+      Alert.alert("Error", "Please select a gender");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post("http://192.168.1.14:5000/signup", {
+      const response = await axios.post("http://192.168.1.2:5000/signup", {
         username: form.username,
         email: form.email,
         password: form.password,

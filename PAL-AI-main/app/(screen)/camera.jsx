@@ -18,15 +18,16 @@ import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = "http://192.168.1.14:5000/predict";
-const API_DB = "http://192.168.1.14:5000/scan";
-
+const API_URL = "http://192.168.1.2:5000/predict";
+const API_DB = "http://192.168.1.2:5000/scan";
 
 export default function App() {
   // Permissions hooks
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-  const [mediaLibraryPermissionResponse, requestMediaLibraryPermission] = MediaLibrary.usePermissions();
-  const [imagePickerPermission, requestImagePickerPermission] = ImagePicker.useMediaLibraryPermissions();
+  const [mediaLibraryPermissionResponse, requestMediaLibraryPermission] =
+    MediaLibrary.usePermissions();
+  const [imagePickerPermission, requestImagePickerPermission] =
+    ImagePicker.useMediaLibraryPermissions();
   const { user } = useAuth();
 
   // Camera and image state
@@ -150,53 +151,60 @@ export default function App() {
   };
 
   const savePicture = async () => {
-
     if (image) {
       try {
-
         const predictionsResult = await sendImageToAPI(image);
         const asset = await MediaLibrary.createAssetAsync(image);
-       // console.log("Predictions:", predictionsResult);
-        
+        // console.log("Predictions:", predictionsResult);
+
         try {
-            const response = await fetch(API_DB, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_profile_id: user.id,
-                    disease_prediction: predictionsResult[0].class_name,
-                    disease_prediction_score: predictionsResult[0].confidence,
-                }),
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-                console.log('Data saved to the database successfully');
-            } else {
-                console.error('Error saving data to the database:', response.status, data);
-                Alert.alert('Error', data.message || 'Failed to save data to the database');
-            }
+          const response = await fetch(API_DB, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_profile_id: user.id,
+              disease_prediction: predictionsResult[0].class_name,
+              disease_prediction_score: predictionsResult[0].confidence,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            console.log("Data saved to the database successfully");
+          } else {
+            console.error(
+              "Error saving data to the database:",
+              response.status,
+              data
+            );
+            Alert.alert(
+              "Error",
+              data.message || "Failed to save data to the database"
+            );
+          }
         } catch (error) {
-            console.error('Network error:', error);
-            Alert.alert('Error', 'Network error occurred while saving data');
+          console.error("Network error:", error);
+          //Alert.alert("Error", "Network error occurred while saving data");
         }
 
-        // Navigate to result screen with the data  
+        // Navigate to result screen with the data
         router.push({
-        pathname: "/result",
-        params: {
-          imageUri: image,
-          disease: predictionsResult[0]?.class_name || "Unknown Disease", 
-          confidence: `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%` || "0%", 
-          date: new Date().toLocaleDateString(),
-          description: predictionsResult[0]?.description || "No description available", 
-          treatments:  predictionsResult[0]?.treatments || "No treatments available",
-        }
-      });
-
+          pathname: "/result",
+          params: {
+            imageUri: image,
+            disease: predictionsResult[0]?.class_name || "Unknown Disease",
+            confidence:
+              `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%` || "0%",
+            date: new Date().toLocaleDateString(),
+            description:
+              predictionsResult[0]?.description || "No description available",
+            treatments:
+              predictionsResult[0]?.treatments || "No treatments available",
+          },
+        });
       } catch (err) {
         console.log("Error while saving the picture:", err);
         Alert.alert("Error", "Failed to save picture");
