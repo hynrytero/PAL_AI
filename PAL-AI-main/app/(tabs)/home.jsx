@@ -1,30 +1,55 @@
-import { View, Text, ImageBackground, ScrollView, Image } from "react-native";
+import {
+  View,
+  Text,
+  ImageBackground,
+  ScrollView,
+  Image,
+  Alert,
+} from "react-native";
 import React, { useState, useEffect } from "react";
+import * as Location from "expo-location"; // Import location library
 import WeatherCard from "../../components/SmallCard";
 import { images, icons } from "../../constants";
 import { weatherApi } from "../api/weather-api";
 
 const Home = () => {
   const [weatherData, setWeatherData] = useState(null);
-  const [location] = useState({
-    latitude: 10.46,
-    longitude: 123.9,
-    city: "Cambinocot",
-  });
+  const [location, setLocation] = useState(null); // Store location data
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
-    const fetchWeatherData = async () => {
-      const data = await weatherApi.fetchWeather(
-        location.latitude,
-        location.longitude
-      );
-      setWeatherData(data);
+    const fetchLocationAndWeather = async () => {
+      // Request permission to access location
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        Alert.alert("Location Error", "Please enable location permissions.");
+        return;
+      }
+
+      try {
+        // Fetch current location
+        const location = await Location.getCurrentPositionAsync({});
+        setLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+
+        // Fetch weather data
+        const data = await weatherApi.fetchWeather(
+          location.coords.latitude,
+          location.coords.longitude
+        );
+        setWeatherData(data);
+      } catch (error) {
+        console.error("Error fetching location or weather data:", error);
+      }
     };
 
-    fetchWeatherData(); // Fetch weather data without relying on dynamic location
-  }, [location]);
+    fetchLocationAndWeather();
+  }, []);
 
-  if (!weatherData) {
+  if (!location || !weatherData) {
     return (
       <ImageBackground
         source={images.backgroundmain}
@@ -32,20 +57,22 @@ const Home = () => {
         resizeMode="cover"
         imageStyle={{ opacity: 0.03 }}
       >
-        <Text className="text-lg text-[#24609B]">Loading weather data...</Text>
+        <Text className="text-lg text-[#24609B]">
+          {errorMsg || "Loading weather data..."}
+        </Text>
       </ImageBackground>
     );
   }
-  const { list } = weatherData; // Get hourly forecast data from the response
 
+  const { list } = weatherData;
   const currentWeather = weatherData.list[0];
-  const dailyForecast = weatherData.list.slice(1, 4); // You can adjust this to fit your daily forecast data
+  const dailyForecast = weatherData.list.slice(1, 4);
 
   const capitalizeFirstLetter = (str) => {
     return str
-      .split(" ") // Split the string into an array of words
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-      .join(" "); // Join the words back into a single string
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   return (
@@ -70,7 +97,7 @@ const Home = () => {
                   resizeMode="contain"
                 />
                 <Text className="font-psemibold text-[20px] text-[#24609B]">
-                  {location.city}
+                  Your Location
                 </Text>
               </View>
               <Text className="text-[#24609B]">
