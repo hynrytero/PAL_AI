@@ -74,7 +74,7 @@ export default function App() {
         },
         body: formData
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -82,6 +82,7 @@ export default function App() {
       const data = await response.json();
       setPredictions(data.predictions);
       return data.predictions;
+
     } catch (error) {
       console.error("Error sending image to API:", error);
       Alert.alert("Error", "Failed to process image");
@@ -171,7 +172,6 @@ export default function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-         // user_profile_id: user.id,
           user_profile_id: user.id,
           disease_prediction: predictionsResult[0].class_number,
           disease_prediction_score: predictionsResult[0].confidence,
@@ -224,7 +224,7 @@ export default function App() {
 
         // Send image for prediction
         const predictionsResult = await sendImageToAPI(image);
-        
+
         // Send image to cloud storage
         const uploadImage = await uploadImageToCloud(image);
         
@@ -233,7 +233,6 @@ export default function App() {
 
         // Get Disease Info
         const result = await getDiseaseInfo(predictionsResult[0].class_number);
-        // console.log("My Object:", JSON.stringify(result, null, 2));
 
         // Save image to gallery
         const asset = await MediaLibrary.createAssetAsync(image);
@@ -243,16 +242,14 @@ export default function App() {
           pathname: "/result",
           params: {
             imageUri: image,
-            disease: result.rice_leaf_disease || "Unknown Disease",
-            confidence:
-              `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%` || "0%",
+            disease: result.rice_leaf_disease,
+            confidence: `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%`,
             date: new Date().toLocaleDateString(),
-            description:
-              result.disease_description || "No description available",
-            treatments:
-              result.treatment_description || "No treatments available",
+            description: result.disease_description,
+            treatments: result.treatment_description,
           },
         });
+
       } catch (err) {
         console.log("Error while saving the picture:", err);
         Alert.alert("Error", "Failed to save picture");
