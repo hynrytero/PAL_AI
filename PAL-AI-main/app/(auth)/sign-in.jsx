@@ -36,7 +36,7 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post("http://192.168.1.2:5000/login", {
+      const response = await axios.post("https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/login", {
         username: form.username,
         password: form.password,
       });
@@ -105,8 +105,8 @@ const SignIn = () => {
           />
           <CustomButton
             title="Log in"
-            // handlePress={handleLogin}
-            handlePress={() => router.push("home")}
+            //handlePress={() => router.push("home")}
+           handlePress={handleLogin}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />

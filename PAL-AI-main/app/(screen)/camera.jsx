@@ -1,25 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Alert,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import {StyleSheet, Text, View, Image, Alert, TouchableOpacity, ActivityIndicator} from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import Slider from "@react-native-community/slider";
 import Button from "../../components/CameraButton";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = "http://192.168.1.2:5000/predict";
-const API_DB = "http://192.168.1.2:5000/scan";
+// endpoints
+const API_URL = "https://pal-ai-model-87197497418.asia-southeast1.run.app/predict";
+const API_DB = "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/save";
+const API_UPLOAD = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/upload';
+const API_INFO = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/disease-info';
 
 export default function App() {
   // Permissions hooks
@@ -30,6 +24,11 @@ export default function App() {
     ImagePicker.useMediaLibraryPermissions();
   const { user } = useAuth();
 
+  const [image, setImage] = useState(null);
+  const [previousImage, setPreviousImage] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [predictions, setPredictions] = useState(null);
+
   // Camera and image state
   const [cameraProps, setCameraProps] = useState({
     zoom: 0,
@@ -38,10 +37,6 @@ export default function App() {
     animateShutter: false,
     enableTorch: false,
   });
-  const [image, setImage] = useState(null);
-  const [previousImage, setPreviousImage] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [predictions, setPredictions] = useState(null);
 
   // Camera reference
   const cameraRef = useRef(null);
@@ -56,39 +51,34 @@ export default function App() {
     }
   }, [cameraPermission, mediaLibraryPermissionResponse]);
 
-  // Convert image to base64 for API transmission
-  const imageToBase64 = async (uri) => {
-    try {
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      return `data:image/jpeg;base64,${base64}`;
-    } catch (error) {
-      console.error("Error converting image to base64:", error);
-      throw error;
-    }
-  };
-
   // Send image to prediction API
   const sendImageToAPI = async (imageUri) => {
     try {
       setIsProcessing(true);
-      const base64Image = await imageToBase64(imageUri);
-
+  
+      if (!imageUri) {
+        throw new Error("Invalid image URI");
+      }
+  
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        type: 'image/jpeg', 
+        name: 'image.jpg'
+      });
+  
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
-        body: JSON.stringify({
-          image: base64Image,
-        }),
+        body: formData
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const data = await response.json();
       setPredictions(data.predictions);
       return data.predictions;
@@ -98,6 +88,28 @@ export default function App() {
       throw error;
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // upload image to google storage
+  const uploadImageToCloud = async (imageUri) => {
+    const formData = new FormData();
+    formData.append('image', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'photo.jpg'
+    });
+  
+    try {
+      const response = await fetch(API_UPLOAD, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      return data.imageUrl; // URL from cloud storage
+    } catch (error) {
+      console.error('Upload failed:', error);
+      throw error;
     }
   };
 
@@ -142,67 +154,103 @@ export default function App() {
         setImage(selectedImage.uri);
 
         // Send selected image to API
-        // const predictions = await sendImageToAPI(selectedImage.uri)
+        //const predictions = await sendImageToAPI(selectedImage.uri)
       }
     } catch (error) {
       console.error("Error picking image:", error);
       Alert.alert("Error", "Failed to select image");
     }
   };
+  
+  // Save Prediction to database
+  async function savePredictionToDB(predictionsResult, uploadImage) {
+    try {
+      const response = await fetch(API_DB, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+         // user_profile_id: user.id,
+          user_profile_id: user.id,
+          disease_prediction: predictionsResult[0].class_number,
+          disease_prediction_score: predictionsResult[0].confidence,
+          scan_image: uploadImage,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log("Data saved to the database successfully");
+      } else {
+        console.error("Error saving data to the database:", response.status, data);
+        Alert.alert("Error", data.message || "Failed to save data to the database");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  }
 
+  // Get disease Information
+  const getDiseaseInfo = async (classNumber) => {
+    try {
+      const response = await fetch(`${API_INFO}/${classNumber}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Disease information not found');
+        }
+        throw new Error('Failed to fetch disease information');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching disease info:', error);
+      throw error;
+    }
+  };
+
+  // Save Picture
   const savePicture = async () => {
+      /* 
+          change the title of the medicine in order to do that must add it to the json file
+          implement environtment variables
+          transfer endpoint code from local to main - change pool methods
+      */
+   
     if (image) {
       try {
+
+        // Send image for prediction
         const predictionsResult = await sendImageToAPI(image);
+        
+        // Send image to cloud storage
+        const uploadImage = await uploadImageToCloud(image);
+        
+        // Send prediction to database
+        savePredictionToDB(predictionsResult, uploadImage);
+
+        // Get Disease Info
+        const result = await getDiseaseInfo(predictionsResult[0].class_number);
+        // console.log("My Object:", JSON.stringify(result, null, 2));
+
+        // Save image to gallery
         const asset = await MediaLibrary.createAssetAsync(image);
-        // console.log("Predictions:", predictionsResult);
-
-        try {
-          const response = await fetch(API_DB, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              user_profile_id: user.id,
-              disease_prediction: predictionsResult[0].class_name,
-              disease_prediction_score: predictionsResult[0].confidence,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            console.log("Data saved to the database successfully");
-          } else {
-            console.error(
-              "Error saving data to the database:",
-              response.status,
-              data
-            );
-            Alert.alert(
-              "Error",
-              data.message || "Failed to save data to the database"
-            );
-          }
-        } catch (error) {
-          console.error("Network error:", error);
-          //Alert.alert("Error", "Network error occurred while saving data");
-        }
 
         // Navigate to result screen with the data
         router.push({
           pathname: "/result",
           params: {
             imageUri: image,
-            disease: predictionsResult[0]?.class_name || "Unknown Disease",
+            disease: result.rice_leaf_disease || "Unknown Disease",
             confidence:
               `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%` || "0%",
             date: new Date().toLocaleDateString(),
             description:
-              predictionsResult[0]?.description || "No description available",
+              result.disease_description || "No description available",
             treatments:
-              predictionsResult[0]?.treatments || "No treatments available",
+              result.treatment_description || "No treatments available",
           },
         });
       } catch (err) {
@@ -255,7 +303,6 @@ export default function App() {
       zoom: Math.min(current.zoom + 0.1, 1),
     }));
   };
-
   const zoomOut = () => {
     setCameraProps((current) => ({
       ...current,
