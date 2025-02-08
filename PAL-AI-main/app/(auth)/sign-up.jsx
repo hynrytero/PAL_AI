@@ -86,16 +86,19 @@ const SignUp = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post("http://192.168.1.2:5000/signup", {
-        username: form.username,
-        email: form.email,
-        password: form.password,
-        firstname: form.firstname,
-        lastname: form.lastname,
-        age: form.age,
-        gender: selectedGender,
-        mobilenumber: form.mobilenumber,
-      });
+      const response = await axios.post(
+        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/signup",
+        {
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          firstname: form.firstname,
+          lastname: form.lastname,
+          age: form.age,
+          gender: selectedGender,
+          mobilenumber: form.mobilenumber,
+        }
+      );
 
       Alert.alert("Success", "Account created successfully");
       router.push("/sign-in");
