@@ -36,10 +36,13 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post("https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/login", {
-        username: form.username,
-        password: form.password,
-      });
+      const response = await axios.post(
+        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/login",
+        {
+          username: form.username,
+          password: form.password,
+        }
+      );
       console.log("Response data:", response.data);
 
       if (response.data.user) {
@@ -106,7 +109,7 @@ const SignIn = () => {
           <CustomButton
             title="Log in"
             //handlePress={() => router.push("home")}
-           handlePress={handleLogin}
+            handlePress={handleLogin}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />

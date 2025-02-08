@@ -16,6 +16,12 @@ const AuthenticationLayout = () => {
             }}
           />
           <Stack.Screen
+            name="sign-up-otp"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="sign-in"
             options={{
               headerShown: false,

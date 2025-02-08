@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import {StyleSheet, Text, View, Image, Alert, TouchableOpacity, ActivityIndicator} from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Alert,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as ImagePicker from "expo-image-picker";
@@ -10,10 +18,14 @@ import { StatusBar } from "expo-status-bar";
 import { useAuth } from "../../context/AuthContext";
 
 // endpoints
-const API_URL = "https://pal-ai-model-87197497418.asia-southeast1.run.app/predict";
-const API_DB = "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/save";
-const API_UPLOAD = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/upload';
-const API_INFO = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/disease-info';
+const API_URL =
+  "https://pal-ai-model-87197497418.asia-southeast1.run.app/predict";
+const API_DB =
+  "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/save";
+const API_UPLOAD =
+  "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/upload";
+const API_INFO =
+  "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/disease-info";
 
 export default function App() {
   // Permissions hooks
@@ -55,34 +67,33 @@ export default function App() {
   const sendImageToAPI = async (imageUri) => {
     try {
       setIsProcessing(true);
-  
+
       if (!imageUri) {
         throw new Error("Invalid image URI");
       }
-  
+
       const formData = new FormData();
-      formData.append('file', {
+      formData.append("file", {
         uri: imageUri,
-        type: 'image/jpeg', 
-        name: 'image.jpg'
+        type: "image/jpeg",
+        name: "image.jpg",
       });
-  
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       setPredictions(data.predictions);
       return data.predictions;
-
     } catch (error) {
       console.error("Error sending image to API:", error);
       Alert.alert("Error", "Failed to process image");
@@ -95,21 +106,21 @@ export default function App() {
   // upload image to google storage
   const uploadImageToCloud = async (imageUri) => {
     const formData = new FormData();
-    formData.append('image', {
+    formData.append("image", {
       uri: imageUri,
-      type: 'image/jpeg',
-      name: 'photo.jpg'
+      type: "image/jpeg",
+      name: "photo.jpg",
     });
-  
+
     try {
       const response = await fetch(API_UPLOAD, {
-        method: 'POST',
-        body: formData
+        method: "POST",
+        body: formData,
       });
       const data = await response.json();
       return data.imageUrl; // URL from cloud storage
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error("Upload failed:", error);
       throw error;
     }
   };
@@ -162,7 +173,7 @@ export default function App() {
       Alert.alert("Error", "Failed to select image");
     }
   };
-  
+
   // Save Prediction to database
   async function savePredictionToDB(predictionsResult, uploadImage) {
     try {
@@ -178,14 +189,21 @@ export default function App() {
           scan_image: uploadImage,
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         console.log("Data saved to the database successfully");
       } else {
-        console.error("Error saving data to the database:", response.status, data);
-        Alert.alert("Error", data.message || "Failed to save data to the database");
+        console.error(
+          "Error saving data to the database:",
+          response.status,
+          data
+        );
+        Alert.alert(
+          "Error",
+          data.message || "Failed to save data to the database"
+        );
       }
     } catch (error) {
       console.error("Network error:", error);
@@ -196,38 +214,37 @@ export default function App() {
   const getDiseaseInfo = async (classNumber) => {
     try {
       const response = await fetch(`${API_INFO}/${classNumber}`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Disease information not found');
+          throw new Error("Disease information not found");
         }
-        throw new Error('Failed to fetch disease information');
+        throw new Error("Failed to fetch disease information");
       }
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching disease info:', error);
+      console.error("Error fetching disease info:", error);
       throw error;
     }
   };
 
   // Save Picture
   const savePicture = async () => {
-      /* 
+    /* 
           change the title of the medicine in order to do that must add it to the json file
           implement environtment variables
           transfer endpoint code from local to main - change pool methods
       */
-   
+
     if (image) {
       try {
-
         // Send image for prediction
         const predictionsResult = await sendImageToAPI(image);
 
         // Send image to cloud storage
         const uploadImage = await uploadImageToCloud(image);
-        
+
         // Send prediction to database
         savePredictionToDB(predictionsResult, uploadImage);
 
@@ -243,13 +260,14 @@ export default function App() {
           params: {
             imageUri: uploadImage,
             disease: result.rice_leaf_disease,
-            confidence: `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%`,
+            confidence: `${(predictionsResult[0]?.confidence * 100).toFixed(
+              2
+            )}%`,
             date: new Date().toLocaleDateString(),
             description: result.disease_description,
             treatments: result.treatment_description,
           },
         });
-
       } catch (err) {
         console.log("Error while saving the picture:", err);
         Alert.alert("Error", "Failed to save picture");
