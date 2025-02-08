@@ -15,11 +15,6 @@ import CustomButton from "../../components/CustomButton";
 const Result = () => {
   // Get the params passed from the previous screen
   const params = useLocalSearchParams();
-  console.log("Received params:", params);
-  console.log("Image URI type:", typeof imageUri);
-  console.log("Image URI value:", imageUri);
-  console.log("FULL PARAMS:", JSON.stringify(params, null, 2));
-
   const {
     imageUri = null,
     disease = "Unknown Disease",
@@ -28,8 +23,9 @@ const Result = () => {
     description = "No description available",
     treatments = "No description available",
   } = params;
-
+  
   console.log("EXTRACTED imageUri:", imageUri);
+
   return (
     <ImageBackground
       source={images.background_result}
@@ -59,7 +55,7 @@ const Result = () => {
 
           {/* Image */}
           <Image
-            source={images.logo} // Replace with your fallback image path
+            source={imageUri ? { uri: imageUri } : images.logo}
             resizeMode="cover"
             className="w-full h-[275px] mb-5 border bg-slate-400"
             borderRadius={10}

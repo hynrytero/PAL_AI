@@ -235,13 +235,13 @@ export default function App() {
         const result = await getDiseaseInfo(predictionsResult[0].class_number);
 
         // Save image to gallery
-        const asset = await MediaLibrary.createAssetAsync(image);
+        //const asset = await MediaLibrary.createAssetAsync(image);
 
         // Navigate to result screen with the data
         router.push({
           pathname: "/result",
           params: {
-            imageUri: image,
+            imageUri: uploadImage,
             disease: result.rice_leaf_disease,
             confidence: `${(predictionsResult[0]?.confidence * 100).toFixed(2)}%`,
             date: new Date().toLocaleDateString(),
