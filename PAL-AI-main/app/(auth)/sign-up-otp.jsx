@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,23 +6,67 @@ import {
   TextInput,
   TouchableOpacity,
   ImageBackground,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import CustomButton from "../../components/CustomButton";
+import { useLocalSearchParams } from 'expo-router';
+import axios from "axios";
 
 const SignUpOTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const otpRefs = useRef([]); // Create refs for each input
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [canResend, setCanResend] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const otpRefs = useRef([]);
+  const router = useRouter();
+  const { email } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const handleResend = async () => {
+    if (!canResend) return;
+    try {
+      await axios.post(
+        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/resend-verification-code",
+        { 
+          email: email,
+        }
+      );
+      Alert.alert("Success", "Verification code resent successfully");
+    } catch (error) {
+      console.log('Error: ', error);
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Resend failed"
+      );
+    }
+    
+    setTimeLeft(60);
+    setCanResend(false);
+
+    setTimeout(() => {
+      setCanResend(true);
+    }, 60000);
+  };
 
   const handleOtpChange = (index, value) => {
-    if (value.length <= 1) {
+    if (value.match(/^[0-9]?$/)) {  // Only allow single digits
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
 
-      // Move focus to the next input field if not the last one
       if (value && index < otpRefs.current.length - 1) {
         otpRefs.current[index + 1].focus();
       }
@@ -30,8 +74,53 @@ const SignUpOTP = () => {
   };
 
   const handleKeyPress = (index, key) => {
-    if (key === "Backspace" && index > 0 && !otp[index]) {
-      otpRefs.current[index - 1].focus(); // Move to the previous input on backspace
+    if (key === 'Backspace' && index > 0 && otp[index] === '') {
+      const newOtp = [...otp];
+      newOtp[index - 1] = '';
+      setOtp(newOtp);
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerification = async () => {
+    const verificationCode = otp.join('');
+    if (verificationCode.length !== 6 || !email) {
+      Alert.alert("Error", "Please enter the complete verification code");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post(
+        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/complete-signup",
+        {
+          email: email,
+          verificationCode: verificationCode
+        }
+      );
+    
+      if (response.status === 201) {
+        Alert.alert(
+          "Success",
+          "Registration completed successfully",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                router.push("/sign-in");
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || 
+        "Verification failed. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -44,7 +133,7 @@ const SignUpOTP = () => {
       <View className="flex-1 items-center px-6 h-full w-full">
         {/* Header */}
         <View className="flex-row w-full items-center justify-start mt-[100px] mb-[100px]">
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/sign-up")}>
             <Icon name="chevron-back" size={24} color="black" />
           </TouchableOpacity>
           <Text className="text-lg font-semibold flex-1 text-center">
@@ -64,7 +153,7 @@ const SignUpOTP = () => {
             We've sent an OTP to your email account
           </Text>
           <Text className="text-center text-black font-semibold">
-            joemarygot@gmail.com
+            {email}
           </Text>
 
           {/* OTP Input Fields */}
@@ -72,7 +161,7 @@ const SignUpOTP = () => {
             {otp.map((digit, index) => (
               <TextInput
                 key={index}
-                ref={(el) => (otpRefs.current[index] = el)} // Assign refs
+                ref={(el) => (otpRefs.current[index] = el)}
                 value={digit}
                 onChangeText={(value) => handleOtpChange(index, value)}
                 onKeyPress={({ nativeEvent }) =>
@@ -86,15 +175,33 @@ const SignUpOTP = () => {
           </View>
 
           {/* Resend OTP */}
-          <TouchableOpacity className="mt-3">
+          <TouchableOpacity 
+            className={`mt-3 ${!canResend ? 'opacity-50' : ''}`}
+            onPress={handleResend}
+            disabled={!canResend}
+          >
             <Text className="text-gray-500">
-              Didn’t receive the code?{" "}
-              <Text className="text-green-700 font-semibold">Resend</Text>
+              {canResend ? (
+                <>
+                  Didn't receive the code?{" "}
+                  <Text className="text-green-700 font-semibold">Resend</Text>
+                </>
+              ) : (
+                <>
+                  Waiting to resend code{" "}
+                  <Text className="text-green-700 font-semibold">({timeLeft}s)</Text>
+                </>
+              )}
             </Text>
           </TouchableOpacity>
 
           {/* Verify Button */}
-          <CustomButton title="Verify" containerStyles="w-full mt-6" />
+          <CustomButton 
+            title={isSubmitting ? "Verifying..." : "Verify"}
+            containerStyles="w-full mt-6"
+            handlePress={handleVerification}
+            disabled={isSubmitting}
+          />
         </View>
       </View>
     </ImageBackground>

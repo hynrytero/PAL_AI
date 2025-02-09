@@ -6,15 +6,16 @@ const CustomButton = ({
   containerStyles,
   textStyles,
   isLoading,
+  disabled, 
 }) => {
   return (
     <TouchableOpacity
-      onPress={handlePress}
+      onPress={disabled ? null : handlePress} // Prevent press when disabled
       activeOpacity={0.7}
       className={`bg-secondary rounded-md min-h-[62px] flex flex-row justify-center items-center ${containerStyles} ${
-        isLoading ? "opacity-50" : ""
+        isLoading || disabled ? "opacity-50" : ""
       }`}
-      disabled={isLoading}
+      disabled={isLoading || disabled} // Disable button when loading OR explicitly disabled
     >
       <Text className={`text-white font-psemibold text-xl ${textStyles}`}>
         {title}
