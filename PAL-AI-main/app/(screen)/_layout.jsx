@@ -36,6 +36,14 @@ const ScreenLayout = () => {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="editprofile"
+          options={{
+            title: "Edit Profile",
+            headerShown: false,
+          }}
+        />
+
       </Stack>
 
       <StatusBar style="dark" />
