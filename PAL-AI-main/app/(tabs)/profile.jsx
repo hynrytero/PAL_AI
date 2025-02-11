@@ -1,4 +1,6 @@
 import React from "react";
+import { TouchableOpacity } from 'react-native';
+import { router } from "expo-router";
 import {
   View,
   Text,
@@ -33,11 +35,14 @@ const Profile = () => {
             {/* This part is the username of user */}
             <Text className="text-3xl font-psemibold mt-5">angelodegams</Text>
           </View>
+
           <View className="flex-row justify-between">
             <Text className="text-lg">About</Text>
-            <Text className="text-lg underline">Edit Profile</Text>
+          <TouchableOpacity onPress={() => router.push("/editprofile")}>
+          <Text className="text-lg underline">Edit Profile</Text>
+          </TouchableOpacity>
           </View>
-          {/* This part is the basic info of the user */}
+
           <View className="flex-col rounded-[5px] border border-[#474747] mt-5">
             <View className="flex-row justify-between m-3">
               <Text className="text-lg">Full Name</Text>
