@@ -106,7 +106,7 @@ const SignIn = () => {
           <CustomButton
             title="Log in"
             // handlePress={handleLogin}
-            handlePress={() => router.push("home")}
+            handlePress={() => router.push("nearby")}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />
