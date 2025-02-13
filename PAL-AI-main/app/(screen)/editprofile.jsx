@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TouchableOpacity, TextInput, Alert } from 'react-native';
+import { TouchableOpacity, TextInput, Alert, Platform } from 'react-native';
 import { router } from "expo-router";
 import {
   View,
@@ -10,6 +10,7 @@ import {
   Image,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack } from "expo-router"; // Make sure expo-router is installed and configured
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Avatar, Card, IconButton, Button } from "react-native-paper";
@@ -18,6 +19,8 @@ import { images } from "../../constants";
 
 const Profile = () => {
   const [profileImage, setProfileImage] = useState(images.angelo);
+  const [birthDate, setBirthDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleApplyChanges = () => {
     Alert.alert(
@@ -48,6 +51,12 @@ const Profile = () => {
     if (!result.canceled) {
       setProfileImage({ uri: result.assets[0].uri });
     }
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || birthDate;
+    setShowDatePicker(Platform.OS === 'ios');
+    setBirthDate(currentDate);
   };
 
   return (
@@ -93,8 +102,9 @@ const Profile = () => {
                     color: 'black',
                     marginTop: 5,
                   }}
-                  placeholder="Angelo"
+                  placeholder="First Name"
                   placeholderTextColor="#474747"
+                  value="Angelo"
                 />
               </View>
               <View style={{ width: '48%' }}>
@@ -109,26 +119,39 @@ const Profile = () => {
                     color: 'black',
                     marginTop: 5,
                   }}
-                  placeholder="Degamo"
+                  placeholder="Last Name"
                   placeholderTextColor="#474747"
+                  value="Degamo"
                 />
               </View>
             </View>
             <View style={{ marginBottom: 10 }}>
-              <Text style={{ fontSize: 18, color: 'black' }}>Email</Text>
-              <TextInput
-                style={{
-                  borderWidth: 1,
-                  borderColor: '#474747',
-                  borderRadius: 5,
-                  padding: 10,
-                  fontSize: 18,
-                  color: 'black',
-                  marginTop: 5,
-                }}
-                placeholder="Email"
-                placeholderTextColor="#474747"
-              />
+              <Text style={{ fontSize: 18, color: 'black' }}>Birth Date</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#474747',
+                    borderRadius: 5,
+                    padding: 10,
+                    fontSize: 18,
+                    color: 'black',
+                    marginTop: 5,
+                  }}
+                  placeholder="Birth Date"
+                  placeholderTextColor="#474747"
+                  value={birthDate.toDateString()}
+                  editable={false}
+                />
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={birthDate}
+                  mode="date"
+                  display="default"
+                  onChange={handleDateChange}
+                />
+              )}
             </View>
             <View style={{ marginBottom: 10 }}>
               <Text style={{ fontSize: 18, color: 'black' }}>Contact Number</Text>
@@ -144,59 +167,10 @@ const Profile = () => {
                 }}
                 placeholder="Contact Number"
                 placeholderTextColor="#474747"
+                value="09123456789"
+                keyboardType="numeric"
               />
             </View>
-          </View>
-          <View style={{ marginBottom: 10 }}>
-            <Text style={{ fontSize: 18, color: 'black' }}>Current Password</Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: '#474747',
-                borderRadius: 5,
-                padding: 10,
-                fontSize: 18,
-                color: 'black',
-                marginTop: 5,
-              }}
-              secureTextEntry={true}
-              placeholder="Current Password"
-              placeholderTextColor="#474747"
-            />
-          </View>
-          <View style={{ marginBottom: 10 }}>
-            <Text style={{ fontSize: 18, color: 'black' }}>New Password</Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: '#474747',
-                borderRadius: 5,
-                padding: 10,
-                fontSize: 18,
-                color: 'black',
-                marginTop: 5,
-              }}
-              secureTextEntry={true}
-              placeholder="New Password"
-              placeholderTextColor="#474747"
-            />
-          </View>
-          <View style={{ marginBottom: 10 }}>
-            <Text style={{ fontSize: 18, color: 'black' }}>Confirm Password</Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: '#474747',
-                borderRadius: 5,
-                padding: 10,
-                fontSize: 18,
-                color: 'black',
-                marginTop: 5,
-              }}
-              secureTextEntry={true}
-              placeholder="Confirm Password"
-              placeholderTextColor="#474747"
-            />
           </View>
         </SafeAreaView>
       </ScrollView>
