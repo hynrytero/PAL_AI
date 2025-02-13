@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity, TextInput, Alert } from 'react-native';
 import { router } from "expo-router";
 import {
@@ -9,6 +9,7 @@ import {
   ImageBackground,
   Image,
 } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 import { Stack } from "expo-router"; // Make sure expo-router is installed and configured
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Avatar, Card, IconButton, Button } from "react-native-paper";
@@ -16,6 +17,8 @@ import { Avatar, Card, IconButton, Button } from "react-native-paper";
 import { images } from "../../constants";
 
 const Profile = () => {
+  const [profileImage, setProfileImage] = useState(images.angelo);
+
   const handleApplyChanges = () => {
     Alert.alert(
       "Confirm Changes",
@@ -33,6 +36,20 @@ const Profile = () => {
     );
   };
 
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage({ uri: result.assets[0].uri });
+    }
+  };
+
   return (
     <ImageBackground
       source={images.background_profile}
@@ -44,11 +61,13 @@ const Profile = () => {
             <Text className="font-pmedium text-[30px]">Edit Profile</Text>
           </View>
           <View className="w-full h-auto items-center justify-center mb-10">
-            <Image
-              source={images.angelo}
-              resizeMode="contain"
-              className="w-[150px] h-[150px] rounded-[75px] overflow-hidden"
-            />
+            <TouchableOpacity onPress={pickImage}>
+              <Image
+                source={profileImage}
+                resizeMode="contain"
+                className="w-[150px] h-[150px] rounded-[75px] overflow-hidden"
+              />
+            </TouchableOpacity>
             {/* This part is the username of user */}
             <Text className="text-3xl font-psemibold mt-5">angelodegams</Text>
           </View>
@@ -60,99 +79,125 @@ const Profile = () => {
             </TouchableOpacity>
           </View>
 
-          <View className="flex-col rounded-[5px] border border-[#474747] mt-5">
-            <View className="flex-row justify-between m-3">
-            <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#474747',
-              borderRadius: 5,
-              padding: 10,
-              marginTop: 10,
-              width: '100%',
-              fontSize: 18,
-              color: 'black'
-            }}
-            placeholder="Angelo Degamo"
-            placeholderTextColor="#474747"
+          <View className="flex-col rounded-[5px] border border-[#474747] mt-5 p-3">
+            <View className="flex-row justify-between mb-3">
+              <View style={{ width: '48%' }}>
+                <Text style={{ fontSize: 18, color: 'black' }}>First Name</Text>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#474747',
+                    borderRadius: 5,
+                    padding: 10,
+                    fontSize: 18,
+                    color: 'black',
+                    marginTop: 5,
+                  }}
+                  placeholder="Angelo"
+                  placeholderTextColor="#474747"
+                />
+              </View>
+              <View style={{ width: '48%' }}>
+                <Text style={{ fontSize: 18, color: 'black' }}>Last Name</Text>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#474747',
+                    borderRadius: 5,
+                    padding: 10,
+                    fontSize: 18,
+                    color: 'black',
+                    marginTop: 5,
+                  }}
+                  placeholder="Degamo"
+                  placeholderTextColor="#474747"
+                />
+              </View>
+            </View>
+            <View style={{ marginBottom: 10 }}>
+              <Text style={{ fontSize: 18, color: 'black' }}>Email</Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#474747',
+                  borderRadius: 5,
+                  padding: 10,
+                  fontSize: 18,
+                  color: 'black',
+                  marginTop: 5,
+                }}
+                placeholder="Email"
+                placeholderTextColor="#474747"
               />
             </View>
-            <View className="flex-row justify-between mb-3 mx-3">
-            <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#474747',
-              borderRadius: 5,
-              padding: 10,
-              marginTop: 10,
-              width: '100%',
-              fontSize: 18,
-              color: 'black'
-            }}
-            placeholder="angelogwapo@gmail.com"
-            placeholderTextColor="#474747"
-              />
-            </View>
-            <View className="flex-row justify-between mb-3 mx-3">
-            <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#474747',
-              borderRadius: 5,
-              padding: 10,
-              marginTop: 10,
-              width: '100%',
-              fontSize: 18,
-              color: 'black'
-            }}
-            placeholder="09123456789"
-            placeholderTextColor="#474747"
+            <View style={{ marginBottom: 10 }}>
+              <Text style={{ fontSize: 18, color: 'black' }}>Contact Number</Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#474747',
+                  borderRadius: 5,
+                  padding: 10,
+                  fontSize: 18,
+                  color: 'black',
+                  marginTop: 5,
+                }}
+                placeholder="Contact Number"
+                placeholderTextColor="#474747"
               />
             </View>
           </View>
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#474747',
-              borderRadius: 5,
-              padding: 10,
-              marginTop: 10,
-              fontSize: 18,
-              color: 'black'
-            }}
-            secureTextEntry={true}
-            placeholder="Current Password"
-            placeholderTextColor="#474747"
-          />
-          
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#474747',
-              borderRadius: 5,
-              padding: 10,
-              marginTop: 10,
-              fontSize: 18,
-              color: 'black'
-            }}
-            secureTextEntry={true}
-            placeholder="New Password"
-            placeholderTextColor="#474747"
-          />
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#474747',
-              borderRadius: 5,
-              padding: 10,
-              marginTop: 10,
-              fontSize: 18,
-              color: 'black'
-            }}
-            secureTextEntry={true}
-            placeholder="Confirm Password"
-            placeholderTextColor="#474747"
-          />
+          <View style={{ marginBottom: 10 }}>
+            <Text style={{ fontSize: 18, color: 'black' }}>Current Password</Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#474747',
+                borderRadius: 5,
+                padding: 10,
+                fontSize: 18,
+                color: 'black',
+                marginTop: 5,
+              }}
+              secureTextEntry={true}
+              placeholder="Current Password"
+              placeholderTextColor="#474747"
+            />
+          </View>
+          <View style={{ marginBottom: 10 }}>
+            <Text style={{ fontSize: 18, color: 'black' }}>New Password</Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#474747',
+                borderRadius: 5,
+                padding: 10,
+                fontSize: 18,
+                color: 'black',
+                marginTop: 5,
+              }}
+              secureTextEntry={true}
+              placeholder="New Password"
+              placeholderTextColor="#474747"
+            />
+          </View>
+          <View style={{ marginBottom: 10 }}>
+            <Text style={{ fontSize: 18, color: 'black' }}>Confirm Password</Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#474747',
+                borderRadius: 5,
+                padding: 10,
+                fontSize: 18,
+                color: 'black',
+                marginTop: 5,
+              }}
+              secureTextEntry={true}
+              placeholder="Confirm Password"
+              placeholderTextColor="#474747"
+            />
+          </View>
         </SafeAreaView>
       </ScrollView>
     </ImageBackground>
