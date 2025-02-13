@@ -28,11 +28,16 @@ const Home = () => {
       }
 
       try {
-        // Fetch current location
-        const location = await Location.getCurrentPositionAsync({});
+        // Fetch current location with high accuracy
+        const location = await Location.getCurrentPositionAsync({
+          enableHighAccuracy: true, // Forces GPS for better accuracy
+          timeout: 10000, // Waits up to 10 seconds for a precise fix
+          maximumAge: 0, // Prevents using cached location
+        });
+
         setLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
+          latitude: Number(location.coords.latitude),
+          longitude: Number(location.coords.longitude),
         });
 
         // Fetch weather data
@@ -97,11 +102,17 @@ const Home = () => {
                   resizeMode="contain"
                 />
                 <Text className="font-psemibold text-[20px] text-[#24609B]">
-                  Your Location
+                  {/* Location Address */}
+                  {weatherData.city.name}
                 </Text>
               </View>
               <Text className="text-[#24609B]">
-                Today {new Date().toLocaleTimeString()}
+                Today{" "}
+                {new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
               </Text>
             </View>
             <Image
@@ -150,30 +161,42 @@ const Home = () => {
               </View>
             </View>
 
-            {/* Daily Forecast */}
             <View className="flex-row mx-7 mt-5 bg-[#D3E9FF] w-full rounded-[5px] p-[10px] justify-between items-center">
               {dailyForecast.map((item, index) => {
-                const forecastDate = new Date(item.dt * 1000); // Forecast date from API
-                const today = new Date(); // Current date
-                const tomorrow = new Date();
-                tomorrow.setDate(today.getDate() + 1); // Set tomorrow's date
+                const forecastDate = new Date(item.dt * 1000); // Convert API timestamp to date
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
+                const dayAfterTomorrow = new Date(today);
+                dayAfterTomorrow.setDate(today.getDate() + 2);
 
-                // Set time to midnight for accurate date comparison
+                // Normalize time to midnight
                 today.setHours(0, 0, 0, 0);
                 tomorrow.setHours(0, 0, 0, 0);
-                forecastDate.setHours(0, 0, 0, 0); // Normalize forecast date
+                dayAfterTomorrow.setHours(0, 0, 0, 0);
+                forecastDate.setHours(0, 0, 0, 0);
 
-                // Determine the day label (Today, Tomorrow, or Weekday)
-                let dayLabel = forecastDate.toLocaleDateString("en-US", {
-                  weekday: "short",
-                });
+                console.log(`Forecast Date: ${forecastDate}`);
+                console.log(
+                  `Today: ${today}, Tomorrow: ${tomorrow}, Day After Tomorrow: ${dayAfterTomorrow}`
+                );
 
-                if (forecastDate.toDateString() === today.toDateString()) {
+                // Determine the correct day label
+                let dayLabel;
+                if (forecastDate.getTime() === today.getTime()) {
                   dayLabel = "Today";
-                } else if (
-                  forecastDate.toDateString() === tomorrow.toDateString()
-                ) {
+                } else if (forecastDate.getTime() === tomorrow.getTime()) {
                   dayLabel = "Tomorrow";
+                } else if (
+                  forecastDate.getTime() === dayAfterTomorrow.getTime()
+                ) {
+                  dayLabel = forecastDate.toLocaleDateString("en-US", {
+                    weekday: "long",
+                  });
+                } else {
+                  dayLabel = forecastDate.toLocaleDateString("en-US", {
+                    weekday: "long",
+                  });
                 }
 
                 return (
@@ -206,8 +229,12 @@ const Home = () => {
               {new Date().toLocaleDateString()}
             </Text>
           </View>
-          <View className="flex-row">
-            {weatherData.list.slice(0, 5).map((item, index) => (
+          <ScrollView
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            className="flex-row bg-blue-200 rounded-[5px] p-3 w-[370px] overflow-scroll"
+          >
+            {weatherData.list.slice(0, 24).map((item, index) => (
               <WeatherCard
                 key={index}
                 time={new Date(item.dt * 1000).toLocaleTimeString([], {
@@ -221,7 +248,7 @@ const Home = () => {
                 bgcolor="#7BAFE3"
               />
             ))}
-          </View>
+          </ScrollView>
         </View>
       </ScrollView>
     </ImageBackground>
