@@ -19,7 +19,10 @@ import { images } from "../../constants";
 
 const Profile = () => {
   const [profileImage, setProfileImage] = useState(images.angelo);
+  const [firstName, setFirstName] = useState("Angelo");
+  const [lastName, setLastName] = useState("Degamo");
   const [birthDate, setBirthDate] = useState(new Date());
+  const [contactNumber, setContactNumber] = useState("09123456789");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleApplyChanges = () => {
@@ -104,7 +107,8 @@ const Profile = () => {
                   }}
                   placeholder="First Name"
                   placeholderTextColor="#474747"
-                  value="Angelo"
+                  value={firstName}
+                  onChangeText={setFirstName}
                 />
               </View>
               <View style={{ width: '48%' }}>
@@ -121,7 +125,8 @@ const Profile = () => {
                   }}
                   placeholder="Last Name"
                   placeholderTextColor="#474747"
-                  value="Degamo"
+                  value={lastName}
+                  onChangeText={setLastName}
                 />
               </View>
             </View>
@@ -167,7 +172,8 @@ const Profile = () => {
                 }}
                 placeholder="Contact Number"
                 placeholderTextColor="#474747"
-                value="09123456789"
+                value={contactNumber}
+                onChangeText={setContactNumber}
                 keyboardType="numeric"
               />
             </View>
