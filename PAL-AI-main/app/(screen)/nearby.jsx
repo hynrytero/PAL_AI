@@ -19,7 +19,7 @@ const nearby = () => {
         >
           <View className="justify-between h-full">
             <View className="flex-row items-center w-full mb-7 bg-white px-7 pt-3 pb-2">
-              <Icon name="chevron-left" size={40} color="black" />
+              <Icon name="chevron-left" size={40} color="black" onPress={() => router.back()} />
               <Text className="font-pmedium text-[30px]">Store Nearby</Text>
             </View>
 
