@@ -7,7 +7,7 @@ export const storeRecommenderApi = {
 
     const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${type}&keyword=${keyword}&key=${apiKey}`;
 
-    console.log(url); // Log the URL for debugging
+    //console.log(url); 
 
     try {
       const response = await fetch(url);
