@@ -33,6 +33,24 @@ const AuthenticationLayout = () => {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="forgot-password"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="sign-in-otp"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="change-password"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
         <StatusBar style="light" />
       </>

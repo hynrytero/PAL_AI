@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import axios from "axios";
-import { TextInput } from "react-native-paper";
+import { TextInput, ToggleButton } from "react-native-paper";
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -106,9 +106,12 @@ const SignIn = () => {
             outlineColor="#CBD2E0"
             textColor="#2D3648"
           />
+          <Text className="text-right font-semibold text-secondary mt-4">
+            <Link href="/forgot-password">Forgot password?</Link>
+          </Text>
           <CustomButton
             title="Log in"
-           // handlePress={() => router.push("home")}
+            // handlePress={() => router.push("home")}
             handlePress={handleLogin}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
