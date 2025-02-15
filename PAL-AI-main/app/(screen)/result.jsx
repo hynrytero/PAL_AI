@@ -1,19 +1,12 @@
 import { View, Text, Image, ScrollView, ImageBackground } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import {
-  Link,
-  Redirect,
-  router,
-  Router,
-  useLocalSearchParams,
-} from "expo-router";
+import { Link, Redirect, router, Router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { images } from "../../constants";
 import CustomButton from "../../components/CustomButton";
 
 const Result = () => {
-  // Get the params passed from the previous screen
   const params = useLocalSearchParams();
   const {
     imageUri = null,
@@ -21,10 +14,17 @@ const Result = () => {
     confidence = "0%",
     date = new Date().toLocaleDateString(),
     description = "No description available",
-    treatments = "No description available",
+    treatments = "No treatments available",
+    fromHistory = false, 
   } = params;
-  
-  console.log("EXTRACTED imageUri:", imageUri);
+
+  const handleBack = () => {
+    if (fromHistory === "true") {
+      router.back();
+    } else {
+      router.push("/camera");
+    }
+  };
 
   return (
     <ImageBackground
@@ -48,7 +48,7 @@ const Result = () => {
               name="chevron-left"
               size={40}
               color="black"
-              onPress={() => router.back()}
+              onPress={handleBack}
             />
             <Text className="font-pmedium text-[30px]">Result</Text>
           </View>
@@ -87,9 +87,10 @@ const Result = () => {
                   imageUri: imageUri,
                   disease: disease || "Unknown Disease",
                   confidence: confidence,
-                  date: new Date().toLocaleDateString(),
+                  date: date,
                   description: description,
-                  treatments: treatments || "No treatments available",
+                  treatments: treatments,
+                  fromHistory: fromHistory, // Pass through the navigation source
                 },
               })
             }
