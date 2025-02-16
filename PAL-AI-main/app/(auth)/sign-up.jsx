@@ -11,7 +11,7 @@ import {
 import React, { useState } from "react";
 import { Link, router } from "expo-router";
 import axios from "axios";
-import { TextInput } from "react-native-paper";
+import { Checkbox, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
 import { images } from "../../constants";
 import CustomButton from "../../components/CustomButton";
@@ -47,14 +47,17 @@ const SignUp = () => {
   const [selectedGender, setSelectedGender] = useState(null);
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
-  const dismissKeyboard = () => {Keyboard.dismiss();};
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
 
   // for form handlng
   const [error, setError] = useState("");
   const [mobileError, setMobileError] = useState("");
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const [ageError, setAgeError] = useState('');
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [ageError, setAgeError] = useState("");
+  const [isChecked, setIsChecked] = useState(false);
 
   // Form Content Validation
   const validateEmail = (email) => {
@@ -68,14 +71,15 @@ const SignUp = () => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/;
     return passwordRegex.test(password);
   };
 
   const validateConfirmPassword = (confirmpassword) => {
     return confirmpassword !== form.password;
   };
-  
+
   const validateAge = (age) => {
     const ageRegex = /^(100|[1-9]?[0-9])$/;
     return ageRegex.test(age);
@@ -97,10 +101,20 @@ const SignUp = () => {
       if (!validateAge(e)) {
         setAgeError("Invalid age");
       } else {
-        setAgeError("");  
+        setAgeError("");
       }
     }
   };
+  const isFormValid =
+    form.firstname.trim() !== "" &&
+    form.lastname.trim() !== "" &&
+    validateAge(form.age) &&
+    validateEmail(form.email) &&
+    validateMobileNumber(form.mobilenumber) &&
+    form.username.trim() !== "" &&
+    validatePassword(form.password) &&
+    form.password === form.confirmpassword &&
+    isChecked; // Checkbox must be checked
 
   const handleChangeMobile = (e) => {
     if (/^\d*$/.test(e) && e.length <= 11) {
@@ -116,7 +130,9 @@ const SignUp = () => {
   const handleChangePassword = (e) => {
     setForm({ ...form, password: e });
     if (!validatePassword(e)) {
-      setPasswordError("Password must be at least 8 characters long, contain 1 uppercase letter, 1 number, and 1 special character.");
+      setPasswordError(
+        "Password must be at least 8 characters long, contain 1 uppercase letter, 1 number, and 1 special character."
+      );
     } else {
       setPasswordError("");
     }
@@ -149,11 +165,10 @@ const SignUp = () => {
       );
       router.push({
         pathname: "/sign-up-otp",
-        params: { email: form.email }
+        params: { email: form.email },
       });
-
     } catch (error) {
-      console.log('Error: ', error);
+      console.log("Error: ", error);
       Alert.alert(
         "Error",
         error.response?.data?.message || "Registration failed"
@@ -234,10 +249,13 @@ const SignUp = () => {
                     setSelectedGender(item.value);
                     setValue(item.value);
                   }}
+                  style={{ flex: 1 }}
                 />
               </View>
             </View>
-            {ageError && form.age.length > 0 && (<Text style={{ color: "red", marginTop: 5 }}>{ageError}</Text>)}
+            {ageError && form.age.length > 0 && (
+              <Text className="text-red-500 mt-1">{ageError}</Text>
+            )}
 
             <TextInput
               label="Email"
@@ -250,8 +268,10 @@ const SignUp = () => {
               textColor="#2D3648"
               error={!!error}
             />
-            {error && form.email.length > 0 && (<Text style={{ color: "red", marginTop: 5 }}>{error}</Text>)}
-            
+            {error && form.email.length > 0 && (
+              <Text className="text-red-500 mt-1">{error}</Text>
+            )}
+
             <TextInput
               label="Mobile Number"
               value={form.mobilenumber}
@@ -264,7 +284,9 @@ const SignUp = () => {
               textColor="#2D3648"
               error={!!mobileError}
             />
-            {mobileError && form.mobilenumber.length > 0 && (<Text style={{ color: "red", marginTop: 5 }}>{mobileError}</Text>)}
+            {mobileError && form.mobilenumber.length > 0 && (
+              <Text className="text-red-500 mt-1">{mobileError}</Text>
+            )}
 
             <TextInput
               label="Username"
@@ -295,7 +317,9 @@ const SignUp = () => {
               textColor="#2D3648"
               error={!!passwordError}
             />
-            {passwordError && form.password.length > 0 && (<Text style={{ color: "red", marginTop: 5 }}>{passwordError}</Text>)}
+            {passwordError && form.password.length > 0 && (
+              <Text className="text-red-500 mt-1">{passwordError}</Text>
+            )}
 
             <TextInput
               label="Confirm Password"
@@ -316,30 +340,32 @@ const SignUp = () => {
               textColor="#2D3648"
               error={!!confirmPasswordError}
             />
-             {confirmPasswordError && form.confirmpassword.length > 0 && (<Text style={{ color: "red", marginTop: 5 }}>{confirmPasswordError}</Text>)}
-
-             <CustomButton
+            {confirmPasswordError && form.confirmpassword.length > 0 && (
+              <Text className="text-red-500 mt-1">{confirmPasswordError}</Text>
+            )}
+            <View className="mt-2 flex-row items-center">
+              <Checkbox
+                status={isChecked ? "checked" : "unchecked"}
+                onPress={() => setIsChecked(!isChecked)}
+                color="#006400"
+              />
+              <Text className="ml-2">
+                I agree to the{" "}
+                <Link
+                  href="/terms-and-condition"
+                  className="text-green-700 font-medium"
+                >
+                  Terms and Conditions
+                </Link>
+              </Text>
+            </View>
+            <CustomButton
               //Ichange lang dri if need muregister {handleSignup}, if deretso sa home kay () => router.push("/sign-up")
               title="Sign Up"
               handlePress={handleSignUp}
               containerStyles="w-full mt-6"
               isLoading={isSubmitting}
-              disabled={
-                !form.firstname ||
-                !form.lastname ||
-                !form.age ||
-                !form.email ||
-                !form.mobilenumber ||
-                !form.username ||
-                !form.password ||
-                !form.confirmpassword ||
-                !selectedGender ||
-                !!error ||         
-                !!mobileError ||     
-                !!passwordError ||   
-                !!confirmPasswordError || 
-                !!ageError          
-              }
+              disabled={!isFormValid}
             />
             <View className="items-center">
               <Text className="mt-3 font-pregular text-sm text-[#4B4B4B]">
