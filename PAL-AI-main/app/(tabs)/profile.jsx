@@ -1,21 +1,24 @@
-import React from "react";
-import { TouchableOpacity } from 'react-native';
+import React, { useState } from "react";
+import { TouchableOpacity, TextInput, Alert, Modal, View, Text, SafeAreaView, ScrollView, ImageBackground, Image } from 'react-native';
 import { router } from "expo-router";
-import {
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  ImageBackground,
-  Image,
-} from "react-native";
-import { Stack } from "expo-router"; // Make sure expo-router is installed and configured
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { Avatar, Card, IconButton, Button } from "react-native-paper";
-
+import { Button } from "react-native-paper";
 import { images } from "../../constants";
 
 const Profile = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [deleteText, setDeleteText] = useState("");
+
+  // const handleDeleteAccount = () => {
+  //   if (deleteText === "Delete") {
+  //     // Perform account deletion logic here
+  //     Alert.alert("Account Deleted", "Your account has been deleted.");
+  //     setModalVisible(false);
+  //     router.push("/sign-in"); // Navigate to the sign-in screen
+  //   } else {
+  //     Alert.alert("Error", "Please type 'Delete' to confirm.");
+  //   }
+  // };
+
   return (
     <ImageBackground
       source={images.background_profile}
@@ -38,9 +41,9 @@ const Profile = () => {
 
           <View className="flex-row justify-between">
             <Text className="text-lg">About</Text>
-          <TouchableOpacity onPress={() => router.push("/editprofile")}>
-          <Text className="text-lg underline">Edit Profile</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/editprofile")}>
+              <Text className="text-lg underline">Edit Profile</Text>
+            </TouchableOpacity>
           </View>
 
           <View className="flex-col rounded-[5px] border border-[#474747] mt-5">
@@ -62,8 +65,9 @@ const Profile = () => {
             style={{ borderRadius: 5, marginTop: 10 }} // Set corner radius
             contentStyle={{ justifyContent: "flex-start" }} // Align text to the left
             labelStyle={{ fontSize: 18, color: "black" }}
+            onPress={() => router.push("/manage")} // Navigate to the manage account screen
           >
-            Change Password
+            Manage Account
           </Button>
           <Button
             mode="outlined"
@@ -72,14 +76,6 @@ const Profile = () => {
             labelStyle={{ fontSize: 18, color: "black" }}
           >
             Log-out
-          </Button>
-          <Button
-            mode="outlined"
-            style={{ borderRadius: 5, marginTop: 10 }} // Set corner radius
-            contentStyle={{ justifyContent: "flex-start" }} // Align text to the left
-            labelStyle={{ fontSize: 18, color: "red" }}
-          >
-            Delete Account
           </Button>
         </SafeAreaView>
       </ScrollView>
