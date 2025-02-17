@@ -6,11 +6,12 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import axios from "axios";
-import { TextInput, ToggleButton } from "react-native-paper";
+import { TextInput, Checkbox } from "react-native-paper";
+import * as SecureStore from 'expo-secure-store';
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -25,6 +26,43 @@ const SignIn = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Load saved credentials on component mount
+  useEffect(() => {
+    loadSavedCredentials();
+  }, []);
+
+  const loadSavedCredentials = async () => {
+    try {
+      const savedCredentials = await SecureStore.getItemAsync('credentials');
+      if (savedCredentials) {
+        const { username, password } = JSON.parse(savedCredentials);
+        setForm({ username, password });
+        setRememberMe(true);
+      }
+    } catch (error) {
+      console.log('Error loading saved credentials:', error);
+    }
+  };
+
+  const saveCredentials = async () => {
+    try {
+      if (rememberMe) {
+        await SecureStore.setItemAsync(
+          'credentials',
+          JSON.stringify({
+            username: form.username,
+            password: form.password,
+          })
+        );
+      } else {
+        await SecureStore.deleteItemAsync('credentials');
+      }
+    } catch (error) {
+      console.log('Error saving credentials:', error);
+    }
+  };
 
   const handleLogin = async () => {
     // Validate input
@@ -49,6 +87,7 @@ const SignIn = () => {
         console.log("Username:" + response.data.user.username);
         console.log("userId:" + response.data.user.id);
         await login(response.data.user.id, response.data.user.username);
+        await saveCredentials(); // Save credentials if remember me is checked
         Alert.alert("Success", "Login Successful");
         router.push("home");
       }
@@ -79,7 +118,7 @@ const SignIn = () => {
           <Text className="font-psemibold text-3xl mt-6">Log in</Text>
           <Text className="text-lg">Welcome! Please enter your details.</Text>
           <TextInput
-            label="Username"
+            label="Username / Email"
             value={form.username}
             onChangeText={(text) => setForm({ ...form, username: text })}
             className="w-full mt-3"
@@ -106,12 +145,21 @@ const SignIn = () => {
             outlineColor="#CBD2E0"
             textColor="#2D3648"
           />
-          <Text className="text-right font-semibold text-secondary mt-4">
-            <Link href="/forgot-password">Forgot password?</Link>
-          </Text>
+          <View className="flex-row justify-between items-center mt-4">
+            <View className="flex-row items-center">
+              <Checkbox
+                status={rememberMe ? 'checked' : 'unchecked'}
+                onPress={() => setRememberMe(!rememberMe)}
+                color="#006400"
+              />
+              <Text className="ml-2">Remember me</Text>
+            </View>
+            <Text className="font-semibold text-secondary">
+              <Link href="/forgot-password">Forgot password?</Link>
+            </Text>
+          </View>
           <CustomButton
             title="Log in"
-            // handlePress={() => router.push("home")}
             handlePress={handleLogin}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}

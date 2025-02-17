@@ -8,18 +8,59 @@ import { TextInput } from "react-native-paper";
 
 const SignUpOTP = () => {
   const router = useRouter();
-  const { email = "" } = useLocalSearchParams(); // Default to empty string if email is missing
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
 
   // State variables
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleVerification = () => {
-    setIsSubmitting(true);
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-    setTimeout(() => {
+  const handleChangeEmail = (e) => {
+    setEmail(e);
+    if (!validateEmail(e)) {
+      setError("Invalid email format");
+    } else {
+      setError("");
+    }
+  };
+
+  const handleVerification = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_URL}/forgot-password/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email 
+        })
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Success - email was found and OTP sent
+        router.push({
+            pathname: "/sign-in-otp",
+            params: { email: email },
+        });
+
+      } else {
+        // Handle error - email not found or server error
+        setError(data.message);
+      }
+    } catch (err) {
+      // Handle network or other errors
+      setError('Failed to send verification code. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      router.push("/sign-in-otp"); // Navigate to OTP verification page
-    }, 2000); // Simulated delay
+    }
   };
 
   return (
@@ -60,17 +101,21 @@ const SignUpOTP = () => {
             label="Email"
             mode="outlined"
             style={{ width: "100%", marginTop: 10 }}
+            onChangeText={handleChangeEmail}
             activeOutlineColor="#006400"
             outlineColor="#CBD2E0"
             textColor="#2D3648"
+            value={email}
+            error={!!error}
           />
+          {error && <Text style={{ color: 'red', marginTop: 5 }}>{error}</Text>}
 
           {/* Send OTP Button */}
           <CustomButton
             title={isSubmitting ? "Sending..." : "Send OTP"}
             containerStyles="w-full mt-6"
             handlePress={handleVerification}
-            disabled={isSubmitting}
+            disabled={isSubmitting || email.trim() === "" || !validateEmail(email)}
           />
 
           {/* Back to Log-In */}

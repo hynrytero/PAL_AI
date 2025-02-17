@@ -24,6 +24,7 @@ const SignInOTP = () => {
   const otpRefs = useRef([]);
   const router = useRouter();
   const { email } = useLocalSearchParams();
+  const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -38,8 +39,7 @@ const SignInOTP = () => {
   const handleResend = async () => {
     if (!canResend) return;
     try {
-      await axios.post(
-        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/resend-verification-code",
+      await axios.post(`${API_URL}/resend-password-otp`,
         {
           email: email,
         }
@@ -83,40 +83,40 @@ const SignInOTP = () => {
   const handleVerification = async () => {
     const verificationCode = otp.join("");
     if (verificationCode.length !== 6 || !email) {
-      Alert.alert("Error", "Please enter the complete verification code");
-      return;
+        Alert.alert("Error", "Please enter the complete verification code");
+        return;
     }
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post(
-        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/complete-signup",
-        {
-          email: email,
-          verificationCode: verificationCode,
-        }
-      );
+        const response = await axios.post(`${API_URL}/verify-otp`, {
+            email: email,
+            otp: verificationCode
+        });
 
-      if (response.status === 201) {
-        Alert.alert("Success", "Registration completed successfully", [
-          {
-            text: "OK",
-            onPress: () => {
-              router.push("/change-password");
-            },
-          },
-        ]);
-      }
+        if (response.status === 200) {
+            Alert.alert("Success", "OTP verified successfully", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        router.push({
+                            pathname: "/change-password",
+                            params: { email: email }
+                        });
+                    },
+                },
+            ]);
+        }
     } catch (error) {
-      Alert.alert(
-        "Error",
-        error.response?.data?.message ||
-          "Verification failed. Please try again."
-      );
+        Alert.alert(
+            "Error",
+            error.response?.data?.message ||
+            "Verification failed. Please try again."
+        );
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
-  };
+};
 
   return (
     <ImageBackground
@@ -127,7 +127,7 @@ const SignInOTP = () => {
       <View className="flex-1 items-center px-6 h-full w-full">
         {/* Header */}
         <View className="flex-row w-full items-center justify-start mt-[100px] mb-[100px]">
-          <TouchableOpacity onPress={() => router.push("/sign-up")}>
+          <TouchableOpacity onPress={() => router.push("/forgot-password")}>
             <Icon name="chevron-back" size={24} color="black" />
           </TouchableOpacity>
           <Text className="text-lg font-semibold flex-1 text-center">

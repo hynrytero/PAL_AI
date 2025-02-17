@@ -114,7 +114,7 @@ const SignUp = () => {
     form.username.trim() !== "" &&
     validatePassword(form.password) &&
     form.password === form.confirmpassword &&
-    isChecked; // Checkbox must be checked
+    isChecked; 
 
   const handleChangeMobile = (e) => {
     if (/^\d*$/.test(e) && e.length <= 11) {

@@ -1,37 +1,119 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ImageBackground } from "react-native";
+import { View, Text, TouchableOpacity, ImageBackground, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { images } from "../../constants";
 import CustomButton from "../../components/CustomButton";
 import { TextInput } from "react-native-paper";
+import axios from "axios";
 
 const ChangePassword = () => {
   const router = useRouter();
-  const { email = "" } = useLocalSearchParams(); // Default to empty string if email is missing
+  const { email = "" } = useLocalSearchParams();
 
-  // State variables
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [form, setForm] = useState({
+    password: "",
+    confirmpassword: ""
+  });
+  
+  const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
+
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [apiError, setApiError] = useState("");
 
-  const handleVerification = () => {
-    if (password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      router.push(); // Navigate to OTP verification page
-    }, 2000); // Simulated delay
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/;
+    return passwordRegex.test(password);
   };
 
+  const validateConfirmPassword = (confirmpassword) => {
+    return confirmpassword === form.password;
+};
+
+  const handleChangePassword = (e) => {
+    setForm({ ...form, password: e });
+    if (!validatePassword(e)) {
+      setPasswordError(
+        "Password must be at least 8 characters long, contain 1 uppercase letter, 1 number, and 1 special character."
+      );
+    } else {
+      setPasswordError("");
+    }
+  };
+
+  const handleConfirmPassword = (e) => {
+    setForm({ ...form, confirmpassword: e });
+    if (!validateConfirmPassword(e)) {  
+        setConfirmPasswordError("Password doesn't match.");
+    } else {
+        setConfirmPasswordError("");
+    }
+};
+
+const handleSubmit = async () => {
+  setApiError("");
+  setIsSubmitting(true);
+
+  try {
+      console.log('Attempting password reset for email:', email);
+      
+      const response = await axios.post(`${API_URL}/reset-password`, { 
+          email: email,
+          newPassword: form.password
+      }, {
+          headers: {
+              'Content-Type': 'application/json'
+          }
+      });
+
+      console.log('Response:', response.data);
+
+      if (response.data.message) {
+          Alert.alert(
+              "Success",
+              "Password changed successfully",
+              [
+                  {
+                      text: "OK",
+                      onPress: () => router.push("/sign-in")
+                  }
+              ]
+          );
+      }
+  } catch (error) {
+      console.error('Full error:', error);
+      console.error('Error response:', error.response?.data);
+      
+      let errorMessage = "An error occurred while changing password";
+      
+      if (error.response) {
+          switch (error.response.status) {
+              case 400:
+                  errorMessage = "Email and new password are required";
+                  break;
+              case 404:
+                  errorMessage = "User not found";
+                  break;
+              case 500:
+                  errorMessage = "Server error. Please try again later.";
+                  console.error('Server Error Details:', error.response.data);
+                  break;
+              default:
+                  errorMessage = error.response.data.error || errorMessage;
+          }
+      } else if (error.request) {
+          errorMessage = "Unable to connect to server. Please check your internet connection.";
+      }
+      
+      setApiError(errorMessage);
+  } finally {
+      setIsSubmitting(false);
+  }
+};
   return (
     <ImageBackground
       source={images.background_signup}
@@ -58,10 +140,14 @@ const ChangePassword = () => {
             </Text>
           </View>
 
+          {apiError ? (
+            <Text className="text-red-500 mb-4 text-center">{apiError}</Text>
+          ) : null}
+
           <TextInput
             label="New Password"
-            value={password}
-            onChangeText={setPassword}
+            value={form.password}
+            onChangeText={handleChangePassword}
             secureTextEntry={!passwordVisible}
             right={
               <TextInput.Icon
@@ -75,23 +161,22 @@ const ChangePassword = () => {
             activeOutlineColor="#006400"
             outlineColor="#CBD2E0"
             textColor="#2D3648"
+            error={!!passwordError}
           />
+          {passwordError ? (
+            <Text className="text-red-500 mt-1 text-sm">{passwordError}</Text>
+          ) : null}
 
           <TextInput
             label="Confirm Password"
-            value={confirmPassword}
-            onChangeText={(text) => {
-              setConfirmPassword(text);
-              setConfirmPasswordError(""); // Reset error when typing
-            }}
+            value={form.confirmpassword}
+            onChangeText={handleConfirmPassword}
             secureTextEntry={!confirmPasswordVisible}
             right={
               <TextInput.Icon
                 icon={confirmPasswordVisible ? "eye-off" : "eye"}
                 color="#006400"
-                onPress={() =>
-                  setConfirmPasswordVisible(!confirmPasswordVisible)
-                }
+                onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
               />
             }
             className="w-full mt-1"
@@ -102,15 +187,15 @@ const ChangePassword = () => {
             error={!!confirmPasswordError}
           />
           {confirmPasswordError ? (
-            <Text className="text-red-500 mt-1">{confirmPasswordError}</Text>
+            <Text className="text-red-500 mt-1 text-sm">{confirmPasswordError}</Text>
           ) : null}
 
           {/* Change Password Button */}
           <CustomButton
             title={isSubmitting ? "Changing..." : "Change"}
             containerStyles="w-full mt-6"
-            handlePress={handleVerification}
-            disabled={isSubmitting}
+            handlePress={handleSubmit}
+            disabled={isSubmitting || !!passwordError || !!confirmPasswordError}
           />
 
           {/* Back to Log-In */}
