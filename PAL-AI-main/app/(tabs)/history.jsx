@@ -14,7 +14,7 @@ import { Stack, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Card from "../../components/Card";
 import { images } from "../../constants";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from "../../context/AuthContext";
 
 const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
 
@@ -23,6 +23,7 @@ const History = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const {user} = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,12 +32,11 @@ const History = () => {
 
   const fetchScanHistory = async () => {
     try {
-      const userId = await AsyncStorage.getItem('userId');
-      if (!userId) {
+      if (!user.id) {
         throw new Error('User not authenticated');
       }
 
-      const response = await fetch(`${API_URL}/api/scan-history/${userId}`);
+      const response = await fetch(`${API_URL}/api/scan-history/${user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch scan history');
       }

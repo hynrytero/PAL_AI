@@ -23,6 +23,7 @@ import background_treatment from "../assets/images/backgroundtreatment.png";
 import backgroundweather from "../assets/images/weatherbg.png";
 import angelo from "../assets/images/angelo.jpg";
 import map from "../assets/images/map.png";
+import Default_Profile from "../assets/images/Default_Profile.jpeg";
 
 export default {
   profile,
@@ -50,4 +51,5 @@ export default {
   backgroundweather,
   angelo,
   map,
+  Default_Profile,
 };

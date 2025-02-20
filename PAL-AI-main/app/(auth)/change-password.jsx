@@ -58,9 +58,7 @@ const handleSubmit = async () => {
   setApiError("");
   setIsSubmitting(true);
 
-  try {
-      console.log('Attempting password reset for email:', email);
-      
+  try {  
       const response = await axios.post(`${API_URL}/reset-password`, { 
           email: email,
           newPassword: form.password
@@ -69,8 +67,6 @@ const handleSubmit = async () => {
               'Content-Type': 'application/json'
           }
       });
-
-      console.log('Response:', response.data);
 
       if (response.data.message) {
           Alert.alert(

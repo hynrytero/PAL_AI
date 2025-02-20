@@ -21,14 +21,15 @@ import { useAuth } from "../../context/AuthContext";
 const SignIn = () => {
   const { login } = useAuth();
   const [form, setForm] = useState({
-    username: "",
+    identifier: "",  
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Load saved credentials on component mount
+  const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
+
   useEffect(() => {
     loadSavedCredentials();
   }, []);
@@ -37,8 +38,8 @@ const SignIn = () => {
     try {
       const savedCredentials = await SecureStore.getItemAsync('credentials');
       if (savedCredentials) {
-        const { username, password } = JSON.parse(savedCredentials);
-        setForm({ username, password });
+        const { identifier, password } = JSON.parse(savedCredentials);  
+        setForm({ identifier, password });
         setRememberMe(true);
       }
     } catch (error) {
@@ -52,7 +53,7 @@ const SignIn = () => {
         await SecureStore.setItemAsync(
           'credentials',
           JSON.stringify({
-            username: form.username,
+            identifier: form.identifier,  
             password: form.password,
           })
         );
@@ -65,8 +66,7 @@ const SignIn = () => {
   };
 
   const handleLogin = async () => {
-    // Validate input
-    if (!form.username || !form.password) {
+    if (!form.identifier || !form.password) { 
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -74,21 +74,22 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(
-        "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app/login",
+      const response = await axios.post(`${API_URL}/login`,
         {
-          username: form.username,
+          identifier: form.identifier, 
           password: form.password,
         }
       );
-      console.log("Response data:", response.data);
+      console.log("Response data:", response.data.message);
 
       if (response.data.user) {
-        console.log("Username:" + response.data.user.username);
-        console.log("userId:" + response.data.user.id);
-        await login(response.data.user.id, response.data.user.username);
-        await saveCredentials(); // Save credentials if remember me is checked
-        Alert.alert("Success", "Login Successful");
+        await login({
+          id: response.data.user.id,
+          username: response.data.user.username,
+          email: response.data.user.email,
+          roleId: response.data.user.roleId
+        });
+        await saveCredentials();
         router.push("home");
       }
     } catch (error) {
@@ -119,8 +120,8 @@ const SignIn = () => {
           <Text className="text-lg">Welcome! Please enter your details.</Text>
           <TextInput
             label="Username / Email"
-            value={form.username}
-            onChangeText={(text) => setForm({ ...form, username: text })}
+            value={form.identifier}  
+            onChangeText={(text) => setForm({ ...form, identifier: text })}  // Updated to use identifier
             className="w-full mt-3"
             mode="outlined"
             activeOutlineColor="#006400"

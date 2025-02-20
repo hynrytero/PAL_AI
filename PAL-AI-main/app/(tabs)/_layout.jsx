@@ -8,6 +8,7 @@ import CustomFAB from "../../components/CustomFloatingActionButton";
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
+    
     <View className="items-center justify-center gap-2">
       <Image
         source={icon}

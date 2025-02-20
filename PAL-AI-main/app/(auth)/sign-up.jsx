@@ -23,7 +23,7 @@ const SignUp = () => {
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",
-    age: "",
+    birthdate: "",
     email: "",
     mobilenumber: "",
     username: "",
@@ -32,9 +32,9 @@ const SignUp = () => {
   });
 
   const data = [
-    { label: "Male", value: "1" },
-    { label: "Female", value: "2" },
-    { label: "Prefer not to say", value: "3" },
+    { label: "Male", value: "male" },
+    { label: "Female", value: "female" },
+    { label: "Prefer not to say", value: "unspecified" },
   ];
 
   const [expanded, setExpanded] = React.useState(true);
@@ -51,12 +51,12 @@ const SignUp = () => {
     Keyboard.dismiss();
   };
 
-  // for form handlng
+  // for form handling
   const [error, setError] = useState("");
   const [mobileError, setMobileError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [ageError, setAgeError] = useState("");
+  const [birthdateError, setBirthdateError] = useState("");
   const [isChecked, setIsChecked] = useState(false);
 
   // Form Content Validation
@@ -80,9 +80,27 @@ const SignUp = () => {
     return confirmpassword !== form.password;
   };
 
-  const validateAge = (age) => {
-    const ageRegex = /^(100|[1-9]?[0-9])$/;
-    return ageRegex.test(age);
+  const validateBirthdate = (birthdate) => {
+    // Check if the date format is MM/DD/YYYY
+    const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/;
+    if (!dateRegex.test(birthdate)) return false;
+
+    // Convert string to Date object
+    const [month, day, year] = birthdate.split('/').map(Number);
+    const date = new Date(year, month - 1, day);
+
+    // Check if it's a valid date (e.g., not 02/31/2024)
+    if (date.getMonth() !== month - 1) return false;
+
+    // Check if the date is not in the future
+    const today = new Date();
+    if (date > today) return false;
+
+    // Check if the person is at least 18 years old
+    const minAge = 18;
+    const minDate = new Date();
+    minDate.setFullYear(minDate.getFullYear() - minAge);
+    return date <= minDate;
   };
 
   // Form handlers
@@ -95,26 +113,36 @@ const SignUp = () => {
     }
   };
 
-  const handleAge = (e) => {
-    if (/^\d*$/.test(e)) {
-      setForm({ ...form, age: e });
-      if (!validateAge(e)) {
-        setAgeError("Invalid age");
-      } else {
-        setAgeError("");
+  const handleBirthdate = (e) => {
+    // Allow only numbers and forward slash
+    if (/^[\d/]*$/.test(e)) {
+      // Auto-format the date as user types
+      let formatted = e;
+      if (e.length === 2 && form.birthdate.length === 1) formatted += '/';
+      if (e.length === 5 && form.birthdate.length === 4) formatted += '/';
+      
+      setForm({ ...form, birthdate: formatted });
+      
+      if (formatted.length === 10) {
+        if (!validateBirthdate(formatted)) {
+          setBirthdateError("Invalid birthdate. Must be at least 18 years old.");
+        } else {
+          setBirthdateError("");
+        }
       }
     }
   };
+
   const isFormValid =
     form.firstname.trim() !== "" &&
     form.lastname.trim() !== "" &&
-    validateAge(form.age) &&
+    validateBirthdate(form.birthdate) &&
     validateEmail(form.email) &&
     validateMobileNumber(form.mobilenumber) &&
     form.username.trim() !== "" &&
     validatePassword(form.password) &&
     form.password === form.confirmpassword &&
-    isChecked; 
+    isChecked;
 
   const handleChangeMobile = (e) => {
     if (/^\d*$/.test(e) && e.length <= 11) {
@@ -158,7 +186,7 @@ const SignUp = () => {
           password: form.password,
           firstname: form.firstname,
           lastname: form.lastname,
-          age: form.age,
+          birthdate: form.birthdate,
           gender: selectedGender,
           mobilenumber: form.mobilenumber,
         }
@@ -221,16 +249,17 @@ const SignUp = () => {
             </View>
             <View className="flex-row w-full justify-between mt-1">
               <TextInput
-                label="Age"
-                value={form.age}
+                label="Birthdate (MM/DD/YYYY)"
+                value={form.birthdate}
                 keyboardType="numeric"
-                onChangeText={handleAge}
+                onChangeText={handleBirthdate}
                 className="w-[48%]"
                 mode="outlined"
                 activeOutlineColor="#006400"
                 outlineColor="#CBD2E0"
                 textColor="#2D3648"
-                error={!!ageError}
+                error={!!birthdateError}
+                maxLength={10}
               />
 
               <View className="w-[48%] bg-white border border-[#CBD2E0] rounded-[5px] p-2 mt-[6px]">
@@ -253,10 +282,11 @@ const SignUp = () => {
                 />
               </View>
             </View>
-            {ageError && form.age.length > 0 && (
-              <Text className="text-red-500 mt-1">{ageError}</Text>
+            {birthdateError && form.birthdate.length > 0 && (
+              <Text className="text-red-500 mt-1">{birthdateError}</Text>
             )}
 
+            {/* Rest of the form remains the same */}
             <TextInput
               label="Email"
               value={form.email}
@@ -360,7 +390,6 @@ const SignUp = () => {
               </Text>
             </View>
             <CustomButton
-              //Ichange lang dri if need muregister {handleSignup}, if deretso sa home kay () => router.push("/sign-up")
               title="Sign Up"
               handlePress={handleSignUp}
               containerStyles="w-full mt-6"
@@ -381,4 +410,5 @@ const SignUp = () => {
     </TouchableWithoutFeedback>
   );
 };
+
 export default SignUp;

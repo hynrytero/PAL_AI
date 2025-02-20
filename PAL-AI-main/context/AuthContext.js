@@ -7,6 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState({
     id: null,
     username: null,
+    email: null,
+    roleId: null,
     isAuthenticated: false
   });
 
@@ -14,13 +16,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const storedUserId = await AsyncStorage.getItem('userId');
-        const storedUsername = await AsyncStorage.getItem('username');
+        const userData = await AsyncStorage.getItem('userData');
         
-        if (storedUserId) {
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
           setUser({
-            id: storedUserId,
-            username: storedUsername,
+            ...parsedUserData,
             isAuthenticated: true
           });
         }
@@ -32,38 +33,66 @@ export const AuthProvider = ({ children }) => {
     checkLoginStatus();
   }, []);
 
-  const login = async (userId, username) => {
+  const login = async (userData) => {
     try {
-      await AsyncStorage.setItem('userId', userId.toString());
-      await AsyncStorage.setItem('username', username);
+      const userToStore = {
+        id: userData.id,
+        username: userData.username,
+        email: userData.email,
+        roleId: userData.roleId
+      };
+
+      // Store all user data as a single JSON string
+      await AsyncStorage.setItem('userData', JSON.stringify(userToStore));
       
       setUser({
-        id: userId,
-        username,
+        ...userToStore,
         isAuthenticated: true
       });
     } catch (error) {
       console.error('Login storage error:', error);
+      throw error; 
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('userId');
-      await AsyncStorage.removeItem('username');
+      await AsyncStorage.removeItem('userData');
       
       setUser({
         id: null,
         username: null,
+        email: null,
+        roleId: null,
         isAuthenticated: false
       });
     } catch (error) {
       console.error('Logout error:', error);
+      throw error;
+    }
+  };
+
+  const updateUserData = async (newUserData) => {
+    try {
+      const currentUserData = await AsyncStorage.getItem('userData');
+      if (currentUserData) {
+        const parsedCurrentData = JSON.parse(currentUserData);
+        const updatedData = { ...parsedCurrentData, ...newUserData };
+        
+        await AsyncStorage.setItem('userData', JSON.stringify(updatedData));
+        setUser({
+          ...updatedData,
+          isAuthenticated: true
+        });
+      }
+    } catch (error) {
+      console.error('Update user data error:', error);
+      throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );

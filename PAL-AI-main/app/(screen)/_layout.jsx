@@ -44,6 +44,14 @@ const ScreenLayout = () => {
           }}
         />
 
+        <Stack.Screen
+          name="manage"
+          options={{
+            title: "Manage",
+            headerShown: false,
+          }}
+        />
+
       </Stack>
 
       <StatusBar style="dark" />
