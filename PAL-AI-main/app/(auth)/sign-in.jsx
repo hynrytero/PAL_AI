@@ -76,18 +76,18 @@ const SignIn = () => {
     try {
       const response = await axios.post(`${API_URL}/login`,
         {
-          identifier: form.identifier, 
-          password: form.password,
+          // identifier: form.identifier, 
+          // password: form.password,
         }
       );
       console.log("Response data:", response.data.message);
 
       if (response.data.user) {
         await login({
-          id: response.data.user.id,
-          username: response.data.user.username,
-          email: response.data.user.email,
-          roleId: response.data.user.roleId
+          // id: response.data.user.id,
+          // username: response.data.user.username,
+          // email: response.data.user.email,
+          // roleId: response.data.user.roleId
         });
         await saveCredentials();
         router.push("home");
@@ -161,7 +161,8 @@ const SignIn = () => {
           </View>
           <CustomButton
             title="Log in"
-            handlePress={handleLogin}
+            // handlePress={handleLogin}
+            handlePress={() => router.push("editprofile")}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />

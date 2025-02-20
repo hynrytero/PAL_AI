@@ -8,6 +8,7 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  Button,
 } from "react-native";
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -241,9 +242,6 @@ const Profile = () => {
 
           <View className="flex-row justify-between">
             <Text className="text-lg">About</Text>
-            <TouchableOpacity onPress={handleApplyChanges}>
-              <Text className="text-lg underline">Apply Changes</Text>
-            </TouchableOpacity>
           </View>
           <View className="flex-col rounded-[5px] border border-[#474747] mt-5 p-3">
             <View className="flex-row justify-between mb-3">
@@ -331,6 +329,9 @@ const Profile = () => {
                 keyboardType="numeric"
               />
             </View>
+          </View>
+          <View style={{ marginTop: 20 }}>
+            <Button title="Apply Changes" onPress={handleApplyChanges} />
           </View>
         </SafeAreaView>
       </ScrollView>

@@ -29,6 +29,11 @@ const ManageAccount = () => {
     confirmPassword: ""
   });
 
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showReEnterNewPassword, setShowReEnterNewPassword] = useState(false);
+  const [showEmailVerificationPassword, setShowEmailVerificationPassword] = useState(false);
+
   const validatePassword = (password) => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/;
     return passwordRegex.test(password);
@@ -220,33 +225,57 @@ const handleVerifyOtp = async () => {
 
   const renderPasswordForm = () => (
     <View className="m-3">
-      <TextInput
-        style={commonInputStyle}
-        placeholder="Current Password"
-        placeholderTextColor="#474747"
-        secureTextEntry
-        value={currentPassword}
-        onChangeText={setCurrentPassword}
-      />
-      <TextInput
-        style={commonInputStyle}
-        placeholder="New Password"
-        placeholderTextColor="#474747"
-        secureTextEntry
-        value={newPassword}
-        onChangeText={(text) => handlePasswordChange(text, 'new')}
-      />
+      <View style={{ position: 'relative' }}>
+        <TextInput
+          style={commonInputStyle}
+          placeholder="Current Password"
+          placeholderTextColor="#474747"
+          secureTextEntry={!showCurrentPassword}
+          value={currentPassword}
+          onChangeText={setCurrentPassword}
+        />
+        <TouchableOpacity
+          style={{ position: 'absolute', right: 10, top: 15 }}
+          onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+        >
+          <Feather name={showCurrentPassword ? "eye-off" : "eye"} size={20} color="#474747" />
+        </TouchableOpacity>
+      </View>
+      <View style={{ position: 'relative' }}>
+        <TextInput
+          style={commonInputStyle}
+          placeholder="New Password"
+          placeholderTextColor="#474747"
+          secureTextEntry={!showNewPassword}
+          value={newPassword}
+          onChangeText={(text) => handlePasswordChange(text, 'new')}
+        />
+        <TouchableOpacity
+          style={{ position: 'absolute', right: 10, top: 15 }}
+          onPress={() => setShowNewPassword(!showNewPassword)}
+        >
+          <Feather name={showNewPassword ? "eye-off" : "eye"} size={20} color="#474747" />
+        </TouchableOpacity>
+      </View>
       {passwordErrors.newPassword ? (
         <Text className="text-red-500 mb-2">{passwordErrors.newPassword}</Text>
       ) : null}
-      <TextInput
-        style={commonInputStyle}
-        placeholder="Re-enter New Password"
-        placeholderTextColor="#474747"
-        secureTextEntry
-        value={reEnterNewPassword}
-        onChangeText={(text) => handlePasswordChange(text, 'confirm')}
-      />
+      <View style={{ position: 'relative' }}>
+        <TextInput
+          style={commonInputStyle}
+          placeholder="Re-enter New Password"
+          placeholderTextColor="#474747"
+          secureTextEntry={!showReEnterNewPassword}
+          value={reEnterNewPassword}
+          onChangeText={(text) => handlePasswordChange(text, 'confirm')}
+        />
+        <TouchableOpacity
+          style={{ position: 'absolute', right: 10, top: 15 }}
+          onPress={() => setShowReEnterNewPassword(!showReEnterNewPassword)}
+        >
+          <Feather name={showReEnterNewPassword ? "eye-off" : "eye"} size={20} color="#474747" />
+        </TouchableOpacity>
+      </View>
       {passwordErrors.confirmPassword ? (
         <Text className="text-red-500 mb-2">{passwordErrors.confirmPassword}</Text>
       ) : null}
@@ -291,14 +320,22 @@ const handleVerifyOtp = async () => {
             </View>
             {showEmailForm && (
               <View className="m-3">
-                <TextInput
-                  style={commonInputStyle}
-                  placeholder="Current Password"
-                  placeholderTextColor="#474747"
-                  secureTextEntry
-                  value={emailVerificationPassword}
-                  onChangeText={setEmailVerificationPassword}
-                />
+                <View style={{ position: 'relative' }}>
+                  <TextInput
+                    style={commonInputStyle}
+                    placeholder="Current Password"
+                    placeholderTextColor="#474747"
+                    secureTextEntry={!showEmailVerificationPassword}
+                    value={emailVerificationPassword}
+                    onChangeText={setEmailVerificationPassword}
+                  />
+                  <TouchableOpacity
+                    style={{ position: 'absolute', right: 10, top: 15 }}
+                    onPress={() => setShowEmailVerificationPassword(!showEmailVerificationPassword)}
+                  >
+                    <Feather name={showEmailVerificationPassword ? "eye-off" : "eye"} size={20} color="#474747" />
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   style={commonInputStyle}
                   placeholder="New Email"
