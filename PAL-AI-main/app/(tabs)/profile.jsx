@@ -86,12 +86,14 @@ const Profile = () => {
     if (!dateString) return 'Not provided';
     
     const date = new Date(dateString);
-    // Check if date is valid
     if (isNaN(date.getTime())) return 'Invalid date';
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     
-    // Format as YYYY-MM-DD
-    return date.toISOString().split('T')[0];
-  };
+    return `${year}-${month}-${day}`;
+};
 
   if (!user?.isAuthenticated) {
     return null;
@@ -117,91 +119,83 @@ const Profile = () => {
   }
 
   const displayName = userData.firstname && userData.lastname 
-    ? `${userData.firstname}`
+    ? `${userData.firstname} ${userData.lastname}`
     : 'No name provided';
 
-  return (
-    <ImageBackground
-      source={images.background_profile}
-      className="flex-1 h-full w-full bg-white"
-    >
-      <ScrollView 
-        className="mt-12"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
+    return (
+      <ImageBackground
+        source={images.background_profile}
+        className="flex-1 h-full w-full bg-white"
       >
-        <SafeAreaView className="px-7 w-full h-full mb-10">
-          <View className="flex-row items-center justify-between w-full mb-3">
-            <Text className="font-pmedium text-[30px]">Profile</Text>
-          </View>
-
-          <View className="w-full h-auto items-center justify-center mb-10">
-            <Image
-              source={userData.image ? { uri: userData.image } : images.Default_Profile}
-              resizeMode="contain"
-              className="w-[150px] h-[150px] rounded-[75px] overflow-hidden"
-            />
-            <Text className="text-3xl font-psemibold mt-5">
-              {displayName}
-            </Text>
-          </View>
-
-          <View className="flex-row justify-between">
-            <Text className="text-lg">About</Text>
-            <TouchableOpacity onPress={() => router.push("/editprofile")}>
-              <Text className="text-lg underline">Edit Profile</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-col rounded-[5px] border border-[#474747] mt-5">
-            <View className="flex-row justify-between m-3">
-              <Text className="text-lg">Name</Text>
-              <Text className="text-lg">{displayName}</Text>
+        <ScrollView
+          className="mt-12"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          <SafeAreaView className="px-6 w-full h-full mb-10">
+            <View className="flex-row items-center justify-between w-full mb-6">
+              <Text className="font-bold text-[32px] text-gray-800">Profile</Text>
             </View>
-            <View className="flex-row justify-between mb-3 mx-3">
-              <Text className="text-lg">Email</Text>
-              <Text className="text-lg">{userData.email || 'Not provided'}</Text>
+  
+            <View className="w-full items-center mb-8">
+              <Image
+                source={userData.image ? { uri: userData.image } : images.Default_Profile}
+                resizeMode="cover"
+                className="w-[140px] h-[140px] rounded-full border-4 border-gray-300 shadow-md"
+              />
+              <Text className="text-2xl font-semibold text-gray-900 mt-4">
+                {userData.firstname}
+              </Text>
             </View>
-            <View className="flex-row justify-between mb-3 mx-3">
-              <Text className="text-lg">Contact Number</Text>
-              <Text className="text-lg">{userData.contactNumber || 'Not provided'}</Text>
+  
+            <View className="w-full bg-white rounded-lg shadow-lg p-4 mb-8 border border-gray-200">
+              <Text className="text-xl font-semibold text-gray-800 mb-3">About</Text>
+  
+              {[
+                { label: "Name", value: displayName },
+                { label: "Email", value: userData.email || "Not provided" },
+                { label: "Contact Number", value: userData.contactNumber || "Not provided" },
+                { label: "Birthdate", value: formatDate(userData.birthdate) || "Not provided" },
+                { label: "Gender", value: userData.gender || "Not provided" },
+              ].map((item, index) => (
+                <View
+                  key={index}
+                  className={`flex-row justify-between py-3 border-b ${index === 4 ? "border-0" : "border-gray-200"}`}
+                >
+                  <Text className="text-base text-gray-600">{item.label}</Text>
+                  <Text className="text-base font-medium text-gray-800">{item.value}</Text>
+                </View>
+              ))}
             </View>
-            <View className="flex-row justify-between mb-3 mx-3">
-              <Text className="text-lg">Birthdate</Text>
-              <Text className="text-lg">{formatDate(userData.birthdate) || 'Not provided'}</Text>
-            </View>
-            <View className="flex-row justify-between mb-3 mx-3">
-              <Text className="text-lg">Gender</Text>
-              <Text className="text-lg">{userData.gender || 'Not provided'}</Text>
-            </View>
-          </View>
-          
-          <Button
-            mode="outlined"
-            style={{ borderRadius: 5, marginTop: 10 }}
-            contentStyle={{ justifyContent: "flex-start" }}
-            labelStyle={{ fontSize: 18, color: "black" }}
-            onPress={() => router.push("/manage")}
-          >
-            Manage Account
-          </Button>
-          <Button
-            mode="outlined"
-            style={{ borderRadius: 5, marginTop: 10 }}
-            contentStyle={{ justifyContent: "flex-start" }}
-            labelStyle={{ fontSize: 18, color: "red" }}
-            onPress={handleLogout}
-          >
-            Log-out
-          </Button>
-        </SafeAreaView>
-      </ScrollView>
-    </ImageBackground>
-  );
-};
+  
+            {[ 
+              { label: "Edit Profile", route: "/editprofile" },
+              { label: "Manage Account", route: "/manage" }
+            ].map((item, index) => (
+              <Button
+                key={index}
+                mode="outlined"
+                style={{ borderRadius: 8, marginVertical: 6 }}
+                contentStyle={{ justifyContent: "center", paddingVertical: 8 }}
+                labelStyle={{ fontSize: 16, color: "#1f2937" }}
+                onPress={() => router.push(item.route)}
+              >
+                {item.label}
+              </Button>
+            ))}
+  
+            <Button
+              mode="outlined"
+              style={{ borderRadius: 8, marginTop: 12 }}
+              contentStyle={{ justifyContent: "center", paddingVertical: 8 }}
+              labelStyle={{ fontSize: 16, color: "#dc2626" }}
+              onPress={handleLogout}
+            >
+              Log-out
+            </Button>
+          </SafeAreaView>
+        </ScrollView>
+      </ImageBackground>
+    );
+  };
 
 export default Profile;

@@ -8,7 +8,6 @@ import {
   ScrollView,
   ImageBackground,
   Image,
-  Button,
 } from "react-native";
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,6 +15,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { images } from "../../constants";
 import Feather from "react-native-vector-icons/Feather";
+import { Button } from "react-native-paper";
 import { useAuth } from "../../context/AuthContext";
 
 const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
@@ -74,15 +74,16 @@ const Profile = () => {
     setFirstName(userData.firstname);
     setLastName(userData.lastname);
     setContactNumber(userData.contactNumber);
+    
     if (userData.birthdate) {
-      const date = new Date(userData.birthdate);
-      const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-      setBirthDate(new Date(date.getTime() + userTimezoneOffset));
+      setBirthDate(new Date(userData.birthdate));
     }
   }, [userData]);
 
   const formatDateForServer = (date) => {
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    const timezoneOffset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - timezoneOffset);
+    return localDate.toISOString().split('T')[0];
   };
 
 
@@ -200,138 +201,112 @@ const Profile = () => {
       source={images.background_profile}
       className="flex-1 h-full w-full bg-white"
     >
-      <ScrollView className="mt-12">
-         <SafeAreaView className="px-7 w-full h-full mb-10">
-                {/* New Header */}
-            <View className="flex-row items-center w-full mb-7">
-               <Feather
-                  name="chevron-left"
-                  size={40}
-                  color="black"
-                  onPress={handleBack}
-               />
-             <Text className="font-pmedium text-[30px]">Edit Profile</Text>
-           </View>
-
-          {/* Enhanced Profile Picture Section */}
-          <View className="w-full h-auto items-center justify-center mb-10">
-            <View style={styles.profileImageContainer}>
-              <TouchableOpacity 
-                onPress={pickImage}
-                style={styles.imageWrapper}
-              >
-                <Image
-                  source={
-                    profileImage
-                      ? { uri: profileImage }
-                      : userData.image
-                        ? { uri: userData.image }
-                        : images.Default_Profile
-                  }
-                  resizeMode="contain"
-                  style={styles.profileImage}
-                />
-                <View style={styles.editIconContainer}>
-                  <Icon name="camera-alt" size={20} color="white" />
-                </View>
-                <View style={styles.editOverlay} />
-              </TouchableOpacity>
-            </View>
-            <Text className="text-3xl font-psemibold mt-5">{userData.firstname}</Text>
+      <ScrollView className="mt-10">
+        <SafeAreaView className="px-6 w-full h-full mb-12">
+          {/* Header */}
+          <View className="flex-row items-center mb-6">
+            <Feather name="chevron-left" size={36} color="black" onPress={handleBack} />
+            <Text className="font-bold text-[28px] ml-3 text-gray-800">Edit Profile</Text>
           </View>
 
-          <View className="flex-row justify-between">
-            <Text className="text-lg">About</Text>
+          {/* Profile Picture */}
+          <View className="items-center mb-8">
+            <TouchableOpacity onPress={pickImage} className="relative">
+              <Image
+                source={
+                  profileImage
+                    ? { uri: profileImage }
+                    : userData.image
+                    ? { uri: userData.image }
+                    : images.Default_Profile
+                }
+                resizeMode="cover"
+                className="w-[140px] h-[140px] rounded-full border-4 border-gray-300 shadow-md"
+              />
+              <View className="absolute bottom-0 right-0 bg-gray-800 rounded-full p-2">
+                <Icon name="camera-alt" size={20} color="white" />
+              </View>
+            </TouchableOpacity>
+            <Text className="text-2xl font-semibold text-gray-900 mt-4">
+              {userData.firstname}
+            </Text>
           </View>
-          <View className="flex-col rounded-[5px] border border-[#474747] mt-5 p-3">
-            <View className="flex-row justify-between mb-3">
-              <View style={{ width: '48%' }}>
-                <Text style={{ fontSize: 18, color: 'black' }}>First Name</Text>
+
+          {/* About Section */}
+          <View className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+            <Text className="text-xl font-semibold text-gray-800 mb-4">About</Text>
+
+            {/* First and Last Name */}
+            <View className="flex-row justify-between mb-4">
+              <View className="w-[48%]">
+                <Text className="text-base text-gray-700">First Name</Text>
                 <TextInput
-                  style={{
-                    borderWidth: 1,
-                    borderColor: '#474747',
-                    borderRadius: 5,
-                    padding: 10,
-                    fontSize: 18,
-                    color: 'black',
-                    marginTop: 5,
-                  }}
+                  className="border border-gray-400 rounded-md p-2 mt-2 text-base text-gray-800"
                   placeholder="Firstname"
-                  placeholderTextColor="#474747"
+                  placeholderTextColor="#9ca3af"
                   value={firstName}
                   onChangeText={setFirstName}
                 />
               </View>
-              <View style={{ width: '48%' }}>
-                <Text style={{ fontSize: 18, color: 'black' }}>Last Name</Text>
+              <View className="w-[48%]">
+                <Text className="text-base text-gray-700">Last Name</Text>
                 <TextInput
-                  style={{
-                    borderWidth: 1,
-                    borderColor: '#474747',
-                    borderRadius: 5,
-                    padding: 10,
-                    fontSize: 18,
-                    color: 'black',
-                    marginTop: 5,
-                  }}
+                  className="border border-gray-400 rounded-md p-2 mt-2 text-base text-gray-800"
                   placeholder="Lastname"
-                  placeholderTextColor="#474747"
+                  placeholderTextColor="#9ca3af"
                   value={lastName}
                   onChangeText={setLastName}
                 />
               </View>
             </View>
-            <View style={{ marginBottom: 10 }}>
-              <Text style={{ fontSize: 18, color: 'black' }}>Birth Date</Text>
+
+            {/* Birth Date */}
+            <View className="mb-4">
+              <Text className="text-base text-gray-700">Birth Date</Text>
               <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                 <TextInput
-                  style={{
-                    borderWidth: 1,
-                    borderColor: '#474747',
-                    borderRadius: 5,
-                    padding: 10,
-                    fontSize: 18,
-                    color: 'black',
-                    marginTop: 5,
-                  }}
+                  className="border border-gray-400 rounded-md p-2 mt-2 text-base text-gray-800"
                   placeholder="Birth Date"
-                  placeholderTextColor="#474747"
-                  value={birthDate.toDateString()}
+                  placeholderTextColor="#9ca3af"
+                  value={birthDate ? birthDate.toDateString() : ""}
                   editable={false}
                 />
               </TouchableOpacity>
               {showDatePicker && (
                 <DateTimePicker
-                  value={birthDate}
+                  value={birthDate || new Date()}
                   mode="date"
                   display="default"
                   onChange={handleDateChange}
                 />
               )}
             </View>
-            <View style={{ marginBottom: 10 }}>
-              <Text style={{ fontSize: 18, color: 'black' }}>Contact Number</Text>
+
+            {/* Contact Number */}
+            <View className="mb-2">
+              <Text className="text-base text-gray-700">Contact Number</Text>
               <TextInput
-                style={{
-                  borderWidth: 1,
-                  borderColor: '#474747',
-                  borderRadius: 5,
-                  padding: 10,
-                  fontSize: 18,
-                  color: 'black',
-                  marginTop: 5,
-                }}
+                className="border border-gray-400 rounded-md p-2 mt-2 text-base text-gray-800"
                 placeholder="Contact Number"
-                placeholderTextColor="#474747"
+                placeholderTextColor="#9ca3af"
                 value={contactNumber}
                 onChangeText={setContactNumber}
                 keyboardType="numeric"
               />
             </View>
           </View>
-          <View style={{ marginTop: 20 }}>
-            <Button title="Apply Changes" onPress={handleApplyChanges} />
+
+          {/* Apply Changes Button */}
+          <View className="mt-6">
+            <Button
+              mode="contained"
+              style={{ borderRadius: 8, backgroundColor: "#1d4ed8" }}
+              contentStyle={{ paddingVertical: 10 }}
+              labelStyle={{ fontSize: 16, fontWeight: "bold" }}
+              onPress={handleApplyChanges}
+            >
+              {"Apply Changes"}
+            </Button>
           </View>
         </SafeAreaView>
       </ScrollView>
