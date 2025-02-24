@@ -7,7 +7,7 @@
     npm install
     npm install -g expo-cli
     npx expo install expo-camera
-    npx expo install expo-media-lbrary
+    npx expo install expo-media-library
     npx expo install @react-native-community/slider
     
 When starting:
