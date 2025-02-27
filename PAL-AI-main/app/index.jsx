@@ -36,7 +36,7 @@ export default function App() {
           <CustomButton
             title="GET STARTED"
             handlePress={() => router.push("/sign-up")}
-            // handlePress={() => router.push("/change-password")}
+            // handlePress={() => router.push("/home")}
             containerStyles="w-full mt-3"
           />
           <Text className="mt-3 font-pmedium text-sm text-[#4B4B4B]">

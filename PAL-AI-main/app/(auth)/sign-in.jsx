@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import axios from "axios";
 import { TextInput, Checkbox } from "react-native-paper";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -21,14 +21,15 @@ import { useAuth } from "../../context/AuthContext";
 const SignIn = () => {
   const { login } = useAuth();
   const [form, setForm] = useState({
-    identifier: "",  
+    identifier: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const API_URL = 'https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app';
+  const API_URL =
+    "https://pal-ai-database-api-sea-87197497418.asia-southeast1.run.app";
 
   useEffect(() => {
     loadSavedCredentials();
@@ -36,14 +37,14 @@ const SignIn = () => {
 
   const loadSavedCredentials = async () => {
     try {
-      const savedCredentials = await SecureStore.getItemAsync('credentials');
+      const savedCredentials = await SecureStore.getItemAsync("credentials");
       if (savedCredentials) {
-        const { identifier, password } = JSON.parse(savedCredentials);  
+        const { identifier, password } = JSON.parse(savedCredentials);
         setForm({ identifier, password });
         setRememberMe(true);
       }
     } catch (error) {
-      console.log('Error loading saved credentials:', error);
+      console.log("Error loading saved credentials:", error);
     }
   };
 
@@ -51,22 +52,22 @@ const SignIn = () => {
     try {
       if (rememberMe) {
         await SecureStore.setItemAsync(
-          'credentials',
+          "credentials",
           JSON.stringify({
-            identifier: form.identifier,  
+            identifier: form.identifier,
             password: form.password,
           })
         );
       } else {
-        await SecureStore.deleteItemAsync('credentials');
+        await SecureStore.deleteItemAsync("credentials");
       }
     } catch (error) {
-      console.log('Error saving credentials:', error);
+      console.log("Error saving credentials:", error);
     }
   };
 
   const handleLogin = async () => {
-    if (!form.identifier || !form.password) { 
+    if (!form.identifier || !form.password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -74,20 +75,18 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(`${API_URL}/login`,
-        {
-          // identifier: form.identifier, 
-          // password: form.password,
-        }
-      );
+      const response = await axios.post(`${API_URL}/login`, {
+        identifier: form.identifier,
+        password: form.password,
+      });
       console.log("Response data:", response.data.message);
 
       if (response.data.user) {
         await login({
-          // id: response.data.user.id,
-          // username: response.data.user.username,
-          // email: response.data.user.email,
-          // roleId: response.data.user.roleId
+          id: response.data.user.id,
+          username: response.data.user.username,
+          email: response.data.user.email,
+          roleId: response.data.user.roleId,
         });
         await saveCredentials();
         router.push("home");
@@ -120,8 +119,8 @@ const SignIn = () => {
           <Text className="text-lg">Welcome! Please enter your details.</Text>
           <TextInput
             label="Username / Email"
-            value={form.identifier}  
-            onChangeText={(text) => setForm({ ...form, identifier: text })}  // Updated to use identifier
+            value={form.identifier}
+            onChangeText={(text) => setForm({ ...form, identifier: text })} // Updated to use identifier
             className="w-full mt-3"
             mode="outlined"
             activeOutlineColor="#006400"
@@ -149,7 +148,7 @@ const SignIn = () => {
           <View className="flex-row justify-between items-center mt-4">
             <View className="flex-row items-center">
               <Checkbox
-                status={rememberMe ? 'checked' : 'unchecked'}
+                status={rememberMe ? "checked" : "unchecked"}
                 onPress={() => setRememberMe(!rememberMe)}
                 color="#006400"
               />
@@ -161,8 +160,8 @@ const SignIn = () => {
           </View>
           <CustomButton
             title="Log in"
-            // handlePress={handleLogin}
-            handlePress={() => router.push("editprofile")}
+            handlePress={handleLogin}
+            // handlePress={() => router.push("editprofile")}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />
