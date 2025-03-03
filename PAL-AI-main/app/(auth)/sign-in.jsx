@@ -160,8 +160,8 @@ const SignIn = () => {
           </View>
           <CustomButton
             title="Log in"
-            handlePress={handleLogin}
-            // handlePress={() => router.push("editprofile")}
+            // handlePress={handleLogin}
+            handlePress={() => router.push("/A-notification")}
             containerStyles="w-full mt-5"
             isLoading={isSubmitting}
           />
