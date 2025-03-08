@@ -105,4 +105,4 @@ const Notification = () => {
   );
 };
 
-export default ANotification;
+export default Notification;
