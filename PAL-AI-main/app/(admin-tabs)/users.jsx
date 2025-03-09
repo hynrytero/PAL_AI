@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   ImageBackground,
   FlatList,
   StyleSheet,
+  TextInput,
 } from "react-native";
-import { Avatar, Card, IconButton } from "react-native-paper";
 import { images } from "../../constants";
 
 const users = [
@@ -30,6 +30,23 @@ const users = [
 ];
 
 const Users = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState(users);
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = users.filter((user) =>
+        `${user.firstname} ${user.lastname}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  };
+
   const renderItem = ({ item }) => (
     <View style={styles.userContainer}>
       <Text style={styles.userName}>{item.firstname} {item.lastname}</Text>
@@ -46,8 +63,14 @@ const Users = () => {
           <View className="flex-row items-center w-full mb-3">
             <Text className="font-pmedium text-[30px]">Users</Text>
           </View>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search users..."
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
           <FlatList
-            data={users}
+            data={filteredUsers}
             renderItem={renderItem}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.list}
@@ -73,10 +96,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
+    width: '100%',
+    height: 96,
   },
   userName: {
     fontSize: 18,
     color: '#333',
+  },
+  searchBar: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingLeft: 8,
+    marginBottom: 16,
   },
 });
 
